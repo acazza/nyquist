@@ -1,0 +1,51 @@
+.wpcf7-form,
+.nyquist-form-group{
+  display: block;
+  position: relative;
+  margin-bottom: 1.5em;
+  label{
+    font-family: $font_body;
+    font-weight: 700;
+  }
+  input[type=submit].search {
+    display: none;
+  }
+
+  .icon-nyquist.icon-search{
+    width: 20px;
+    height: 20px;
+    fill: $color_primary;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right:0
+  }
+}
+
+.wpcf7-form-control,
+.nyquist-input-field{
+  display: block;
+  position: relative;
+  margin: 0.5em 0;
+  padding: 0.5em;
+  width: 100%;
+  font-family: $font_body;
+  font-size: 1em;
+  font-weight: 400;
+  &::-webkit-input-placeholder{
+    color: $color_base_light;
+    font-weight: 300;
+  }
+  &:-ms-input-placeholder{
+    color: $color_base_light;
+    font-weight: 300;
+  }
+  &::-ms-input-placeholder{
+    color: $color_base_light;
+    font-weight: 300;
+  }
+  &::placeholder{
+    color: $color_base_light;
+    font-weight: 300;
+  }
+}

@@ -1,0 +1,89 @@
+.button-container {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.btn{
+  display: inline-block;
+  margin: 1em;
+  padding: 0.6em 1.6em;
+  border-radius: 0.25em;
+  border-width: 1px;
+  border-style: solid;
+  letter-spacing: 1px;
+}
+
+.btn-submit{
+  display: block;
+  margin: 0 auto;
+  padding: 1em;
+  font-size: 1em;
+  //width: 50%
+}
+
+.btn-default{
+  background-color: $color_offblack;
+  border-color: $color_offblack;
+  color: $color_offwhite;
+  -webkit-transition: all 320ms ease-in-out;
+  transition: all 320ms ease-in-out;
+  &.btn-outlined{
+    background-color: transparent;
+    border-color: $color_offblack;
+    color: $color_offblack;
+    -webkit-transition: all 320ms ease-in-out;
+    transition: all 320ms ease-in-out;
+    &:focus, &:hover {
+      background-color: $color_offblack;
+      border-color: $color_offblack;
+      color: $color_offwhite;
+    }
+  }
+}
+
+
+.btn-primary {
+  background-color: $color_primary;
+  border-color: $color_primary;
+  color: $color_offwhite;
+  -webkit-transition: all 320ms ease-in-out;
+  transition: all 320ms ease-in-out;
+  &.focus, &:hover{
+    background-color: $color_primary_dark;
+    border-color: $color_primary_dark;
+    color: $color_offwhite;
+  }
+  &.btn-outlined {
+    background-color: transparent;
+    border-color: $color_primary;
+    color: $color_primary;
+  }
+}
+
+.btn-accent {
+  background-color: $color_accent;
+  border-color: $color_accent;
+  color: $color_offwhite;
+  &.focus, &:hover{
+    background-color: $color_accent_light;
+    border-color: $color_accent_light;
+    color: $color_offwhite;
+  }
+  &.btn-outlined {
+    background-color: transparent;
+    border-color: $color_accent;
+    color: $color_accent;
+  }
+}
+
+.btn-inverse {
+  background-color: $color_offwhite;
+  border-color: $color_offwhite;
+  color: $color_offblack;
+  &.btn-outlined {
+    background-color: transparent;
+    border-color: $color_offwhite;
+    color: $color_offwhite;
+  }
+}

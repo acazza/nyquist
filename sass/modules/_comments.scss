@@ -1,0 +1,26 @@
+section{
+  .post-nav-link,
+  .comment-nav-link{
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+  }
+
+  .post-next-link,
+  .post-previous-link,
+  .comment-next-link,
+  .comment-previous-link{
+    display: inline-block;
+    .icon-nyquist,
+    .icon-angle-left,
+    .icon-angle-right{
+      height: 1em;
+      width: 1em;
+
+    }
+  }
+
+}

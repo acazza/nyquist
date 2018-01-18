@@ -1,0 +1,31 @@
+section{
+  margin: 40px;
+}
+
+.banner-container{
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex
+}
+
+.banner-content{
+  display: inline-block;
+  width: 65%
+}
+
+.banner-headline{
+  font-size: 2.5em;
+  font-weight: 400;
+}
+
+.banner-lead{
+  font-size: 1em;
+}
+
+.banner-cta{
+  text-align: center;
+}
+
+.banner-image{
+  display: inline-block;
+}

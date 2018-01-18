@@ -1,0 +1,166 @@
+body{
+  font-family: $font_body;
+}
+
+h1, h2, h3, h4, h5, h6{
+  font-family: $font_head;
+}
+
+p{
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  margin-top: 2em;
+}
+
+a{
+  color: $color_primary;
+  text-decoration: none;
+  -webkit-transition: all 320ms ease-in-out;
+  transition: all 320ms ease-in-out;
+  &:focus, &:hover{
+    color: $color_primary_dark;
+  }
+}
+
+.color-primary{
+  color: $color_primary;
+}
+
+.color-secondary{
+  color: $color_secondary;
+}
+
+.color-accent{
+  color: $color_accent;
+}
+
+.color_offblack{
+  color: $color_offblack;
+}
+
+.color_base_dark{
+  color: $color_base_dark;
+}
+
+.color_offwhite{
+  color: $color_offwhite;
+}
+
+
+
+article.type-system {
+
+  font-family: $font_body; //$sans-serif;
+  text-align: left;
+
+  h2,
+  h3,
+  h4,
+  p {
+    margin: 0;
+  }
+
+  hr {
+    border-bottom: 1px solid $color_base_dark; //$light-gray;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    margin: $base-spacing 0;
+  }
+
+  p {
+    color: $color_offblack; //$base-font-color;
+    line-height: $base-line-height;
+  }
+
+  a {
+    color: $color_primary; //$action-color;
+    text-decoration: none;
+  }
+
+  .type {
+    border-bottom: 1px solid;
+    display: inline-block;
+    font-family: $font_head;//$sans-serif-2;
+    font-size: 0.7em;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 2em;
+    padding: 0.1em 0;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-family: $font_head; //$sans-serif-2;
+    font-size: 2em;
+    font-weight: 600;
+    margin-bottom: 0.6em;
+
+    // @include media($medium-screen) {
+    //   font-size: 2.4em;
+    // }
+  }
+
+  h3 {
+    font-family: $font_body; //$sans-serif;
+    font-size: 1.2em;
+    font-weight: 400;
+    line-height: 1.4em;
+    margin-bottom: 1.2em;
+
+    // @include media($medium-screen) {
+    //   font-size: 1.4em;
+    // }
+  }
+
+  code {
+    background: #f7f7f7;
+    border-radius: $base-border-radius * 1.5;
+    border: 1px solid #e0e0e0;
+    font-family: monaco;
+    font-size: 0.65em;
+    font-style: normal;
+    padding: 0.1em 0.4em;
+    white-space: nowrap;
+  }
+
+  h4 {
+    font-family: $font_head; //$sans-serif-2;
+    font-size: 1em;
+    font-weight: 700;
+    line-height: 1.4em;
+    margin-bottom: 0.5em;
+    text-transform: uppercase;
+  }
+
+  p.date {
+    color: transparentize($color_offblack, 0.6); //($base-font-color, 0.6);
+    font-family: $font_body; //$sans-serif;
+    font-size: 0.8em;
+    margin-bottom: 0.5em;
+  }
+
+  p {
+    font-family: $font_body; //$sans-serif;
+    font-weight: 300;
+    letter-spacing: 1;
+    margin-bottom: 1.5em;
+
+    span {
+      font-family: $font_body; //$sans-serif;
+      font-size: 0.8em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+  }
+
+  hr {
+    width: 3em;
+  }
+
+  p.author {
+    font-family: $font_body; //$sans-serif;
+    font-style: italic;
+  }
+}

@@ -1,0 +1,89 @@
+html, body {
+  margin: 0;
+  padding: 0
+}
+
+body {
+  background-color: $color_offwhite;
+  color: $color_offblack;
+}
+
+.container-fluid{
+  width: 100%;
+  margin: 0;
+  padding: 0
+}
+
+.container {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 2%
+}
+
+.container-narrow{
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.background-image{
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+ul {
+  padding: 0;
+}
+
+hr{
+  border-top: 1px solid $color_base_dark;
+}
+
+.site-header{
+  display: block;
+  position: relative;
+  background-attachment: fixed;
+}
+
+.overlay{
+  position: absolute;
+  display: block;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: $color_primary; /* For browsers that do not support gradients */
+  background: -webkit-gradient(linear, left top, right bottom, from($color_primary), to($color_secondary));
+  background: linear-gradient(to bottom right, $color_primary, $color_secondary); /* Standard syntax */
+  opacity: 0.4;
+  &:after{
+
+  }
+}
+
+.hero{
+  height: 480px;
+  color: $color_offwhite;
+  .container {
+    text-align: center;
+  }
+}
+
+.icon {
+  display: inline-block;
+  fill: $color_offblack;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+.hide{
+  display: none;
+}
+
+/*
+=== Placeholder ===
+*/
+
+%text-shadow{
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}

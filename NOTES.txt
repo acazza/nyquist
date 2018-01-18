@@ -1,0 +1,34 @@
+- Paragraphs are styled correctly.
+Left, Center, Right, Justify aligned paragraphs align properly.
+- h1-h6 elements are styled (as appropriate).
+- blockquote, cite styled (as appropriate).
+  Block quotes should be indented or otherwise distinct from paragraph text.
+  If the Theme uses a background image or quote symbol, make sure displays correctly on both short and long quotes.
+
+- span with style and ASCII characters should display properly.
+- table, tr, th, td are styled (as appropriate).
+- dl (dt, dd), ul, ol, li styled (as appropriate).
+  Nested lists should be indented correctly.
+
+- The following HTML tags should be styled appropriately to ensure semantic meaning of each  tag is preserved: address, a, big, cite, code, del, em, ins, kbd, pre, q, s, strong, sub, sup, tt, var.
+
+Note: abbr and acronym require no special styling. Also, s may be address but was deprected with HTML 4 and can be left with no special styling as well.
+div, span maintain proper block or inline display, and styled (as appropriate).
+
+
+- Menus
+Test with a large number of categories or pages in the menu, and test with multiple levels deep in the menus.
+If custom menus are enabled, test the layout both with custom menus enabled and with the fallback navigation menus (no custom menu enabled).
+- Widgets
+All widgets display correctly.
+The default WordPress widgets should work correctly in all widgetized areas.
+If the Theme uses custom widgets, they should work correctly. (Custom widgets are programmatically added by the Theme to the list of available widgets in Appearance > Widgets.)
+- Test all available widgets in all available widgetized areas in the Theme layout.
+Content that appears in widgetized areas by default (hard-coded into the sidebar, for example) should disappear when widgets are enabled from Appearance > Widgets.
+
+Post With Long Title
+This Post Has No Body
+(no title)
+Many Categories / Many Tags
+Clearing Floats
+Many Trackbacks

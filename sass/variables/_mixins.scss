@@ -1,0 +1,37 @@
+
+//Mixins partial
+
+/*
+* Generates background-image in either standard size or retina display version (@2x)
+*/
+@mixin retina($path, $ext: "png", $w: auto, $h: auto, $pos: center center, $repeat: no-repeat) {
+
+  background-image: url($path + '.' + $ext);
+  background-position: $pos;
+  background-repeat: $repeat;
+
+  @media
+    (-webkit-min-device-pixel-ratio: 2),
+    (min-resolution: 192dpi) {
+      background-image: url($path + '@2x' + '.' + $ext);
+      background-size: $w $h;
+      background-position: $pos;
+      background-repeat: $repeat;
+    }
+}
+
+/*
+* Generates background-image in either standard size or retina display version (@2x)
+* image-set is NOT supported by IE, Edge, Firefox and OperaMini
+*/
+@mixin retina-alt ($path, $ext: "png", $pos: center center, $repeat: no-repeat) {
+  background-repeat: $repeat;
+  background-position: $pos;
+  background-size: cover;
+  background-image: url($path + '.' + $ext); // Fallback
+  background-image:
+      -webkit-image-set (
+          url($path + '.' + $ext) 1x,
+          url($path + '@2x' + '.' + $ext) 2x
+          );
+}

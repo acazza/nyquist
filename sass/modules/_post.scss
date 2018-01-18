@@ -1,0 +1,364 @@
+article {
+  max-width: 720px; //improves readability
+  margin: 3em auto;
+  padding-bottom: 3em;
+
+  .entry-header{
+    text-align: center;
+  }
+
+  .entry-title{
+    font-size: 3em;
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+    &:before, &:after{
+      content: '~';
+      display: inline-block;
+      position: relative;
+    }
+    &:before{
+      margin-right: 0.4em;
+    }
+    &:after{
+      margin-left: 0.4em;
+    }
+  }
+
+  .entry-meta{
+    font-size: 0.8em;
+    margin: 1em 0;
+  }
+
+  .posted-on {
+    color: $color_base_dark;
+  }
+
+  .standard-featured-link{
+    display: block;
+    position: relative;
+    -webkit-transition: all 320 ease-in-out;
+    transition: all 320 ease-in-out;
+    &:hover, &:focus{
+
+      .standard-featured{
+        &:after {
+          background-color: rgba(0, 0, 0, 0.3);
+        }
+      }
+    }
+  }
+
+  .standard-featured {
+    display: block;
+    position: relative;
+    height: 240px;
+    margin: 2em 0;
+    &:after{
+      content: '';
+      position: absolute;
+      display: block;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.2);
+      -webkit-box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.35);
+              box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.35);
+      -webkit-transition: all 320ms ease-in-out;
+      transition: all 320ms ease-in-out;
+    }
+  }
+
+  .share-post{
+    text-align: center;
+  }
+
+  .share-button{
+    padding: 5px;
+    margin-right: 5px;
+    .icon-nyquist{
+      width: 20px;
+      height: 20px;
+      fill: $color_offwhite;
+    }
+  }
+
+  .entry-footer{
+    font-size: 0.75em;
+    color: $color_base_dark;
+    text-transform: uppercase;
+    a{
+      color: $color_base_dark;
+      -webkit-transition: all 320 ease-in-out;
+      transition: all 320 ease-in-out;
+      &:hover, &:focus{
+        color: $color_offblack;
+      }
+    }
+    .icon-nyquist{
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      fill: $color_base_dark;
+    }
+    .icon-comment{
+      margin-left: 10px
+    }
+  }
+
+  .tags-list{
+    //margin-left: 1em;
+    display: inline-block;
+    a{
+      display: inline-block;
+      padding: 0 0.5em;
+    }
+  }
+
+  .post-footer-container{
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+  }
+
+}
+
+/*
+=== Image Post Format ===
+*/
+
+article.nyquist-format-image{
+
+  .entry-header{
+    @extend %text-shadow;
+    position: relative;
+    height: 400px;
+  }
+
+  .entry-title{
+    padding-top: 0.4em;
+  }
+
+  .entry-header,
+  .entry-title,
+  .entry-meta{
+    color: $color_offwhite;
+    a{
+      color: $color_offwhite;
+    }
+  }
+
+  .entry-excerpt{
+    &.image-caption{
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(0, 0 ,0 , 0.7);
+      p{
+        margin: 1.2em 0;
+      }
+    }
+  }
+
+}
+
+/*
+=== Audio Post Format ===
+*/
+
+article.nyquist-format-audio{
+
+  .entry-header{
+    text-align: left;
+  }
+
+  .entry-title{
+    display: inline-block;
+    margin-right: 0.5em;
+    font-size: 2em;
+    &:before, &:after{
+      display: none;
+    }
+  }
+
+  .entry-meta{
+    display: inline-block;
+  }
+
+  .entry-content{
+    iframe{
+      min-width: 100%;
+      height: 172px;
+    }
+  }
+}
+
+
+/*
+=== Video Post Format ===
+*/
+
+article.nyquist-format-video{
+  .embed-responsive{
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+
+    video, iframe, embed, object{
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    &.widescreen{
+      padding-top: 56.25%;
+    }
+  }
+}
+
+
+/*
+=== Link Post Format ===
+*/
+
+article.nyquist-format-link{
+
+  .entry-title{
+    &:before, &:after{
+      display: none;
+    }
+    a{
+      display: block;
+    }
+  }
+
+  .link-icon{
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    margin: 10px auto;
+    width: 1.2em;
+    height: 1.2em;
+    background-color: $color_primary;
+    border-radius: 50%;
+    color: $color_offwhite;
+
+    .icon-nyquist{
+      margin: 0 auto;
+      width: 60%;
+      height: 60%;
+      fill: $color_offwhite;
+      -webkit-transition: all 320ms ease-in-out;
+      transition: all 320ms ease-in-out;
+      &:hover {
+        fill: $color_primary_light;
+        -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
+      }
+    }
+  }
+}
+
+/*
+=== Quote Post Format ===
+*/
+
+article.nyquist-format-quote{
+  .quote-content{
+    margin: 0;
+    padding: 0;
+    font-size: 2em;
+    font-weight: 300;
+    p{
+      line-height: 1.2;
+    }
+  }
+}
+
+
+/*
+=== Aside Post Format ===
+*/
+
+article.nyquist-format-aside{
+
+  .aside-container{
+    background-color: $color_base_light;
+    //padding: 2em;
+  }
+
+  .entry-content{
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+
+  .aside-featured{
+    //display: inline-block;
+    min-width: 120px;
+    height: 120px;
+    margin: 2em 2em 2em 0;
+    border-radius: 50%;
+  }
+
+  .entry-footer{
+    background-color: $color_base_dark;
+  }
+}
+
+
+/*
+=== Single Post Template ===
+*/
+
+article.nyquist-single{
+  margin-bottom: 0;
+}
+
+section{
+  &.article-comments,
+  &.article-navigation{
+    max-width: 720px;
+    margin: 0 auto;
+  }
+}
+
+ul.share-social-media{
+  list-style: none;
+  li{
+    display: inline-block;
+  }
+  .share-button{
+    background-color: $color_base_dark;
+    border-radius: 50%;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    -webkit-transition: all 320ms ease-in-out;
+    transition: all 320ms ease-in-out;
+    &:focus, &:hover{
+      background-color: $color_offblack;
+      -webkit-transform: scale(1.05);
+              transform: scale(1.05)
+    }
+    .icon{
+      width: 100%;
+      fill: $color_offwhite
+    }
+  }
+}
