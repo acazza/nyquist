@@ -302,7 +302,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
      * @param
      */
 
-    public function add_meta_box( $title, $fields = array(), $context = 'normal', $priority = 'default'  )
+    public function add_custom_fields( $title, $fields = array(), $context = 'normal', $priority = 'default'  )
     {
       if( ! empty( $title ) )
       {

@@ -8,7 +8,7 @@ if( !class_exists( 'SoundlushBook') ){
     public function create_book()
     {
 
-      // Create custom taxonomy
+      // Create Custom Taxonomy
       $authors_args = array(
         'hierarchical' => true,
       );
@@ -16,7 +16,9 @@ if( !class_exists( 'SoundlushBook') ){
       $this->add_taxonomy( 'author', 'radio' , $authors_args );
 
 
-      $this->add_meta_box(
+
+      // Create Custom Fields
+      $this->add_custom_fields(
           'Book Info',
           array(
               'Year' => 'text',
@@ -24,7 +26,7 @@ if( !class_exists( 'SoundlushBook') ){
           )
       );
 
-      $this->add_meta_box(
+      $this->add_custom_fields(
           'Author Info',
           array(
               'Name' => 'text',
