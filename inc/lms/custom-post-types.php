@@ -426,20 +426,27 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
           global $post;
           $post_id = $post->ID;
 
+
           // Deny the WordPress autosave function
           if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
 
 
-          if ( !isset($_POST['custom_post_type_nonce']) || !wp_verify_nonce( $_POST['custom_post_type_nonce'], basename(__FILE__) ) ) {
+          // Verify nonce
+          if ( !isset($_POST['custom_post_type_nonce']) || !wp_verify_nonce( $_POST['custom_post_type_nonce'], basename(__FILE__) ) )
+          {
             return $post_id;
           }
 
-          // Check permissions TODO order with the if below
-          // if ('page' == $_POST['custom_post_type']) {
-          //   if ( !current_user_can('edit_page', $post_id ) || !current_user_can('edit_post', $post_id  ) ) {
-          //     return $post_id;
-          //   }
-          // }
+
+          // Check permissions
+          if ('page' == $_POST['custom_post_type_nonce'])
+          {
+            if ( !current_user_can('edit_page', $post_id ) || !current_user_can('edit_post', $post_id  ) )
+            {
+              return $post_id;
+            }
+          }
+
 
           if( isset( $_POST ) && isset( $post->ID ) && get_post_type( $post->ID ) == $post_type_name )
           {
