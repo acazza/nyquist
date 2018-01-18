@@ -302,7 +302,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
      * @param $custom_fields
      */
 
-    public function add_custom_fields_2( $custom_array )
+    public function add_custom_fields( $custom_array )
     {
       if( !empty( $custom_array ) )
       {
@@ -362,78 +362,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
      }
 
 
-    // public function add_custom_fields( $title, $fields = array(), $context = 'normal', $priority = 'default'  )
-    // {
-    //   if( ! empty( $title ) )
-    //   {
-    //     // We need to know the Post Type name again
-    //     $post_type_name = $this->post_type_name; // book
-    //
-    //     // Meta variables
-    //     $box_id         = SoundlushHelpers::uglify( $title ); //book_info
-    //     $box_title      = SoundlushHelpers::beautify( $title ); // Book Info
-    //     $box_context    = $context; //normal
-    //     $box_priority   = $priority; //default
-    //
-    //     // Make the fields global
-    //     global $custom_fields;
-    //
-    //     // Get custom fields arguments array with index per metabox title
-    //     $custom_fields[$title] = $fields;
-    //   }
-    //
-    //   add_action( 'admin_init',
-    //     function() use( $box_id, $box_title, $post_type_name, $box_context, $box_priority, $fields )
-    //     {
-    //       add_meta_box(
-    //         $box_id,
-    //         $box_title,
-    //         function( $post, $data )
-    //         {
-    //           global $post;
-    //
-    //           wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' );
-    //
-    //           // Get the saved values
-    //           $meta = get_post_custom( $post->ID );
-    //
-    //           // Get all inputs from $data
-    //           $custom_fields = $data['args'][0];
-    //
-    //           // Check the array and loop through it
-    //           if( ! empty( $custom_fields ) )
-    //           {
-    //             /* Loop through $custom_fields */
-    //             foreach( $custom_fields as $label => $type )
-    //             {
-    //                 $field_id_name = SoundlushHelpers::uglify( $data['id'] ) . '_' . SoundlushHelpers::uglify( $label );
-    //                 $value = isset( $meta[$field_id_name][0] ) ? esc_attr( $meta[$field_id_name][0] ) : '';
-    //
-    //                 switch ($type) {
-    //                   case 'text':
-    //                     echo '<label for="' . $field_id_name . '">' . $label . ': </label>';
-    //                     echo '<input type="text" name="' . $field_id_name . '" id="' . $field_id_name . '" value="' . $value . '" />';
-    //                     break;
-    //
-    //                   default:
-    //                     break;
-    //                 }
-    //
-    //
-    //             }
-    //           }
-    //
-    //         },
-    //         $post_type_name,
-    //         $box_context,
-    //         $box_priority,
-    //         array( $fields )
-    //       );
-    //     }
-    //   );
-    // }
-
-
 
     /**
      * Listens for when the post type is being saved
@@ -476,22 +404,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
           if( isset( $_POST ) && isset( $post->ID ) && get_post_type( $post->ID ) == $post_type_name )
           {
-            // global $custom_fields;
-            //
-            // // Loop through each meta box
-            // foreach( $custom_fields as $title => $fields )
-            // {
-            //     // Loop through all fields
-            //     foreach( $fields as $label => $type )
-            //     {
-            //         $field_id_name = SoundlushHelpers::uglify( $title ) . '_' . SoundlushHelpers::uglify( $label );
-            //         if( isset( $_POST[$field_id_name] ) )
-            //         {
-            //           update_post_meta( $post_id, $field_id_name, wp_kses( $_POST[$field_id_name] ) );
-            //         }
-            //     }
-            // }
-
             global $fields;
 
             // Checks for input and sanitizes/saves if needed
