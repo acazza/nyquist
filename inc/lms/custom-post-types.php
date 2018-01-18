@@ -349,8 +349,16 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     $field_id_name = SoundlushHelpers::uglify( $data['id'] ) . '_' . SoundlushHelpers::uglify( $label );
                     $value = isset( $meta[$field_id_name][0] ) ? esc_attr( $meta[$field_id_name][0] ) : '';
 
-                    echo '<label for="' . $field_id_name . '">' . $label . '</label>';
-                    echo '<input type="text" name="' . $field_id_name . '" id="' . $field_id_name . '" value="' . $value . '" />';
+                    switch ($type) {
+                      case 'text':
+                        echo '<label for="' . $field_id_name . '">' . $label . ': </label>';
+                        echo '<input type="text" name="' . $field_id_name . '" id="' . $field_id_name . '" value="' . $value . '" />';
+                        break;
+
+                      default:
+                        break;
+                    }
+
 
                 }
               }
