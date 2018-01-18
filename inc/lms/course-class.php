@@ -18,24 +18,51 @@ if( !class_exists( 'SoundlushBook') ){
 
 
       // Create Custom Fields
-      $this->add_custom_fields(
-          'Book Info',
-          array(
-              'Year' => 'text',
-              'Genre' => 'text'
-          )
+      // $this->add_custom_fields(
+      //     'Book Info',
+      //     array(
+      //         'Year' => 'text',
+      //         'Genre' => 'text'
+      //     )
+      // );
+      //
+      // $this->add_custom_fields(
+      //     'Author Info',
+      //     array(
+      //         'Name' => 'text',
+      //         'Nationality' => 'text',
+      //         'Birthday' => 'text'
+      //     )
+      // );
+
+
+      // Testing new format
+      $this->add_custom_fields_2(
+        array(
+          'id'        => 'video-meta-box',
+          'title'     => __( 'Video' ),
+          'fields'    => array(
+            array(
+                'name'      => 'Select Video Host',
+                'desc'      => 'Enter video host here.',
+                'id'        =>  'aam_video_select',
+                'std'       => 'Default value here.',
+                'type'      => 'text',
+                //'options'   => array( 'Youtube', 'Vimeo', 'Self hosted' )
+            ),
+            array(
+                'name'      => 'URL',
+                'desc'      => 'Enter video url here.',
+                'id'        => 'amm_video_url',
+                'std'       => 'Default value here.',
+                'type'      => 'text'
+            )
+          ),
+          'context'   => 'normal',
+          'priority'  => 'default',
+          //'pages'     => 'post',
+        )
       );
-
-      $this->add_custom_fields(
-          'Author Info',
-          array(
-              'Name' => 'text',
-              'Nationality' => 'text',
-              'Birthday' => 'text'
-          )
-      );
-
-
 
 
 

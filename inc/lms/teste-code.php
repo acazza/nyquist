@@ -89,7 +89,7 @@ class Custom_Meta_Boxes{
 
             foreach ( $this->_meta_box['fields'] as $field) {
 
-                
+
                 // get current post meta data
                 $meta = get_post_meta( $post->ID, $field['id'], true );
 
@@ -191,4 +191,36 @@ if ( class_exists( 'Custom_Meta_Boxes' ) ){
     }
 }
 
-?>
+
+
+/* Loop through $custom_fields */
+// foreach ($custom_fields as $custom_field) {
+//
+//     echo '<div class="custom-field">';
+//     echo '<div class="custom-field-label"><label for="' . $custom_field['id'] . '">' . $custom_field['label'] . '</label></div>';
+//     echo '<div class="custom-field-input">';
+//
+//
+//     // Outputs field
+//     switch($custom_field['type']) {
+//       case 'text': // Text
+//           echo '<input type="text" name="custom_meta_' . $custom_field['id'] . '" id="'. $custom_field['id'] . '" value="'. $meta .'" size="30" /><br /><span class="description">'.$custom_field['desc'].'</span>';
+//           break;
+//       case 'textarea': //Textarea
+//           echo '<textarea name="custom_meta_' . $custom_field['id'] . '" id="'.$custom_field['id'].'" cols="60" rows="4">'.$meta.'</textarea><br /><span class="description">'.$custom_field['desc'].'</span>';
+//           break;
+//       case 'checkbox': //Checkbox
+//           echo '<input type="checkbox" name="custom_meta_' . $custom_field['id'] . '" id="'.$custom_field['id'].'" ',$meta ? ' checked="checked"' : '','/>
+//           <label for="'.$custom_field['id'].'">'.$custom_field['desc'].'</label>';
+//           break;
+//       case 'select': //Combobox
+//           echo '<select name="custom_meta_' . $custom_field['id'] . '" id="'.$custom_field['id'].'">';
+//           foreach ($custom_field['options'] as $option) {
+//             echo '<option', $meta == $option['value'] ? ' selected="selected"' : '', ' value="'.$option['value'].'">'.$option['label'].'</option>';
+//           }
+//           echo '</select><br /><span class="description">'.$custom_field['desc'].'</span>';
+//           break;
+//     }
+//     echo '</div></div>';
+//
+// }

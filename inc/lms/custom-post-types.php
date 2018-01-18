@@ -299,27 +299,24 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     /**
      * Attaches custom field meta boxes to the post type
-     * @param
+     * @param $custom_fields
      */
 
-    public function add_custom_fields( $title, $fields = array(), $context = 'normal', $priority = 'default'  )
+    public function add_custom_fields_2( $custom_array )
     {
-      if( ! empty( $title ) )
+      if( !empty( $custom_array ) )
       {
         // We need to know the Post Type name again
         $post_type_name = $this->post_type_name; // book
 
+        global $fields;
+
         // Meta variables
-        $box_id         = SoundlushHelpers::uglify( $title ); //book_info
-        $box_title      = SoundlushHelpers::beautify( $title ); // Book Info
-        $box_context    = $context; //normal
-        $box_priority   = $priority; //default
-
-        // Make the fields global
-        global $custom_fields;
-
-        // Get custom fields arguments array with index per metabox title
-        $custom_fields[$title] = $fields;
+        $box_id         = SoundlushHelpers::uglify( $custom_array['id'] ); //TODO FALLBACK
+        $box_title      = SoundlushHelpers::beautify( $custom_array['title'] ); //TODO FALLBACK
+        $box_context    = $custom_array['context'] ? $custom_array['context'] : 'normal';
+        $box_priority   = $custom_array['priority'] ? $custom_array['priority'] : 'default';
+        $fields         = $custom_array['fields'];
       }
 
       add_action( 'admin_init',
@@ -328,84 +325,113 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
           add_meta_box(
             $box_id,
             $box_title,
-            function( $post, $data )
+            function( $post, $data ) use( $fields )
             {
               global $post;
 
               wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' );
 
-              // Get the saved values
-              $meta = get_post_custom( $post->ID );
-
-              // Get all inputs from $data
-              $custom_fields = $data['args'][0];
-
               // Check the array and loop through it
-              if( ! empty( $custom_fields ) )
-              {
-                /* Loop through $custom_fields */
-                foreach( $custom_fields as $label => $type )
-                {
-                    $field_id_name = SoundlushHelpers::uglify( $data['id'] ) . '_' . SoundlushHelpers::uglify( $label );
-                    $value = isset( $meta[$field_id_name][0] ) ? esc_attr( $meta[$field_id_name][0] ) : '';
+              if( ! empty( $fields ) ) {
 
-                    switch ($type) {
+                  /* Loop through $fields */
+                  foreach ( $fields as $field)
+                  { // TODO FALLBACK FOR ALL FIELDS
+                    $meta = get_post_meta( $post->ID, $field['id'], true );
+
+                    echo '<label for="', $field['id'] , '">', $field['name'] , '</label>';
+
+                    switch ( $field['type'] ) {
                       case 'text':
-                        echo '<label for="' . $field_id_name . '">' . $label . ': </label>';
-                        echo '<input type="text" name="' . $field_id_name . '" id="' . $field_id_name . '" value="' . $value . '" />';
+                        echo '<input type="text" name="', $field['id'] , '" id="', $field['id'] , '" value="', $meta , '" />';
+                        echo '<p class="meta-desc">' , $field['desc'] , '</p>';
                         break;
-
                       default:
                         break;
                     }
-
-
-                }
+                  }
               }
+             },
+             $post_type_name,
+             $box_context,
+             $box_priority,
+             array( $fields )
+           );
+         }
+       );
+     }
 
-            },
-            $post_type_name,
-            $box_context,
-            $box_priority,
-            array( $fields )
-          );
-        }
-      );
-    }
 
-
-                /* Loop through $custom_fields */
-                // foreach ($custom_fields as $custom_field) {
-                //
-                //     echo '<div class="custom-field">';
-                //     echo '<div class="custom-field-label"><label for="' . $custom_field['id'] . '">' . $custom_field['label'] . '</label></div>';
-                //     echo '<div class="custom-field-input">';
-                //
-                //
-                //     // Outputs field
-                //     switch($custom_field['type']) {
-                //       case 'text': // Text
-                //           echo '<input type="text" name="custom_meta_' . $custom_field['id'] . '" id="'. $custom_field['id'] . '" value="'. $meta .'" size="30" /><br /><span class="description">'.$custom_field['desc'].'</span>';
-                //           break;
-                //       case 'textarea': //Textarea
-                //           echo '<textarea name="custom_meta_' . $custom_field['id'] . '" id="'.$custom_field['id'].'" cols="60" rows="4">'.$meta.'</textarea><br /><span class="description">'.$custom_field['desc'].'</span>';
-                //           break;
-                //       case 'checkbox': //Checkbox
-                //           echo '<input type="checkbox" name="custom_meta_' . $custom_field['id'] . '" id="'.$custom_field['id'].'" ',$meta ? ' checked="checked"' : '','/>
-                //           <label for="'.$custom_field['id'].'">'.$custom_field['desc'].'</label>';
-                //           break;
-                //       case 'select': //Combobox
-                //           echo '<select name="custom_meta_' . $custom_field['id'] . '" id="'.$custom_field['id'].'">';
-                //           foreach ($custom_field['options'] as $option) {
-                //             echo '<option', $meta == $option['value'] ? ' selected="selected"' : '', ' value="'.$option['value'].'">'.$option['label'].'</option>';
-                //           }
-                //           echo '</select><br /><span class="description">'.$custom_field['desc'].'</span>';
-                //           break;
-                //     }
-                //     echo '</div></div>';
-                //
-                // }
-
+    // public function add_custom_fields( $title, $fields = array(), $context = 'normal', $priority = 'default'  )
+    // {
+    //   if( ! empty( $title ) )
+    //   {
+    //     // We need to know the Post Type name again
+    //     $post_type_name = $this->post_type_name; // book
+    //
+    //     // Meta variables
+    //     $box_id         = SoundlushHelpers::uglify( $title ); //book_info
+    //     $box_title      = SoundlushHelpers::beautify( $title ); // Book Info
+    //     $box_context    = $context; //normal
+    //     $box_priority   = $priority; //default
+    //
+    //     // Make the fields global
+    //     global $custom_fields;
+    //
+    //     // Get custom fields arguments array with index per metabox title
+    //     $custom_fields[$title] = $fields;
+    //   }
+    //
+    //   add_action( 'admin_init',
+    //     function() use( $box_id, $box_title, $post_type_name, $box_context, $box_priority, $fields )
+    //     {
+    //       add_meta_box(
+    //         $box_id,
+    //         $box_title,
+    //         function( $post, $data )
+    //         {
+    //           global $post;
+    //
+    //           wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' );
+    //
+    //           // Get the saved values
+    //           $meta = get_post_custom( $post->ID );
+    //
+    //           // Get all inputs from $data
+    //           $custom_fields = $data['args'][0];
+    //
+    //           // Check the array and loop through it
+    //           if( ! empty( $custom_fields ) )
+    //           {
+    //             /* Loop through $custom_fields */
+    //             foreach( $custom_fields as $label => $type )
+    //             {
+    //                 $field_id_name = SoundlushHelpers::uglify( $data['id'] ) . '_' . SoundlushHelpers::uglify( $label );
+    //                 $value = isset( $meta[$field_id_name][0] ) ? esc_attr( $meta[$field_id_name][0] ) : '';
+    //
+    //                 switch ($type) {
+    //                   case 'text':
+    //                     echo '<label for="' . $field_id_name . '">' . $label . ': </label>';
+    //                     echo '<input type="text" name="' . $field_id_name . '" id="' . $field_id_name . '" value="' . $value . '" />';
+    //                     break;
+    //
+    //                   default:
+    //                     break;
+    //                 }
+    //
+    //
+    //             }
+    //           }
+    //
+    //         },
+    //         $post_type_name,
+    //         $box_context,
+    //         $box_priority,
+    //         array( $fields )
+    //       );
+    //     }
+    //   );
+    // }
 
 
 
@@ -450,34 +476,34 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
           if( isset( $_POST ) && isset( $post->ID ) && get_post_type( $post->ID ) == $post_type_name )
           {
-            global $custom_fields;
+            // global $custom_fields;
+            //
+            // // Loop through each meta box
+            // foreach( $custom_fields as $title => $fields )
+            // {
+            //     // Loop through all fields
+            //     foreach( $fields as $label => $type )
+            //     {
+            //         $field_id_name = SoundlushHelpers::uglify( $title ) . '_' . SoundlushHelpers::uglify( $label );
+            //         if( isset( $_POST[$field_id_name] ) )
+            //         {
+            //           update_post_meta( $post_id, $field_id_name, wp_kses( $_POST[$field_id_name] ) );
+            //         }
+            //     }
+            // }
 
-            // Loop through each meta box
-            foreach( $custom_fields as $title => $fields )
+            global $fields;
+
+            // Checks for input and sanitizes/saves if needed
+            foreach ( $fields as $field )
             {
-                // Loop through all fields
-                foreach( $fields as $label => $type )
-                {
-                    $field_id_name = SoundlushHelpers::uglify( $title ) . '_' . SoundlushHelpers::uglify( $label );
-                    if( isset( $_POST[$field_id_name] ) )
-                    {
-                      update_post_meta( $post_id, $field_id_name, wp_kses( $_POST[$field_id_name] ) );
-                    }
-                }
-
-
-                // Make sure your data is set before trying to save it
-                    // if( isset( $_POST['my_meta_box_text'] ) )
-                    //     update_post_meta( $post_id, 'my_meta_box_text', wp_kses( $_POST['my_meta_box_text'], $allowed ) );
-                    //
-                    // if( isset( $_POST['my_meta_box_select'] ) )
-                    //     update_post_meta( $post_id, 'my_meta_box_select', esc_attr( $_POST['my_meta_box_select'] ) );
-                    //
-                    // // This is purely my personal preference for saving check-boxes
-                    // $chk = isset( $_POST['my_meta_box_check'] ) && $_POST['my_meta_box_select'] ? 'on' : 'off';
-                    // update_post_meta( $post_id, 'my_meta_box_check', $chk );
-
+              if( isset( $_POST[$field['id']] ) )
+              {
+                $new = sanitize_text_field( $_POST[ $field['id'] ] );
+                update_post_meta( $post_id, $field['id'],  $new );
+              }
             }
+
           }
         }
       );
