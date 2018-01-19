@@ -45,6 +45,26 @@ if( !class_exists( 'SoundlushBook') ){
         )
       );
 
+
+      $this->add_custom_fields(
+        array(
+          'id'        => 'summary-meta-box',
+          'title'     => __( 'Summary' ),
+          'fields'    => array(
+            array(
+                'name'      => 'Book Summary',
+                'desc'      => 'Enter your book summary here.',
+                'id'        =>  'aam_book_summary',
+                'std'       => 'Type here.',
+                'type'      => 'editor',
+            ),
+          ),
+          'context'   => 'normal',
+          'priority'  => 'default',
+          //'pages'     => 'post',
+        )
+      );
+
           // array(
           //     'label' => 'Select Box',
           //     'desc'  => 'A description for the field.',
@@ -72,4 +92,4 @@ if( !class_exists( 'SoundlushBook') ){
 
 $book = new SoundlushBook('Book');
 $book->create_book();
-$mb = new SoundlushRadioTaxonomy('book', 'author' );
+//$mb = new SoundlushRadioTaxonomy('book', 'author' );

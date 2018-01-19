@@ -337,15 +337,50 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                   /* Loop through $fields */
                   foreach ( $fields as $field)
                   { // TODO FALLBACK FOR ALL FIELDS
+
                     $meta = get_post_meta( $post->ID, $field['id'], true );
 
                     echo '<label for="', $field['id'] , '">', $field['name'] , '</label>';
 
                     switch ( $field['type'] ) {
+
                       case 'text':
                         echo '<input type="text" name="', $field['id'] , '" id="', $field['id'] , '" value="', $meta , '" />';
                         echo '<p class="meta-desc">' , $field['desc'] , '</p>';
                         break;
+
+                      case 'textarea':
+                        echo '<textarea name="', $field['id'], '" id="', $field['id'], '" cols="60" rows="4" style="width:97%">', $meta , '</textarea>';
+                        echo '<p class="meta-desc">' , $field['desc'] , '</p>';
+                        break;
+
+                      case 'select':
+                        echo '<select name="', $field['id'], '" id="', $field['id'], '">';
+                        foreach ( $field['options'] as $option ) {
+                            echo '<option', $meta == $option ? ' selected="selected"' : '', '>', $option, '</option>';
+                        }
+                        echo '</select>';
+                        break;
+
+                      case 'radio':
+                        foreach ( $field['options'] as $option ) {
+                            echo '<input type="radio" name="', $field['id'], '" value="', $option['value'], '"', $meta == $option['value'] ? ' checked="checked"' : '', ' />', $option['name'];
+                        }
+                        break;
+
+                      case 'checkbox':
+                        echo '<input type="checkbox" name="', $field['id'], '" id="', $field['id'], '"', $meta ? ' checked="checked"' : '', ' />';
+                        break;
+
+                      case 'editor':
+                        $settings = array(
+                          'wpautop'       => false,
+                          'media_buttons' => false,
+                          'textarea_name' => $field['id'],
+                        );
+                        wp_editor( htmlspecialchars_decode( $meta ), $field['id'], $settings );
+                        break;
+
                       default:
                         break;
                     }
@@ -411,7 +446,11 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
             {
               if( isset( $_POST[$field['id']] ) )
               {
-                $new = sanitize_text_field( $_POST[ $field['id'] ] );
+                if( $field['type'] = 'editor' ) {
+                  $new = htmlspecialchars( $_POST[ $field['id'] ] );
+                } else {
+                  $new = sanitize_text_field( $_POST[ $field['id'] ] );
+                }
                 update_post_meta( $post_id, $field['id'],  $new );
               }
             }
