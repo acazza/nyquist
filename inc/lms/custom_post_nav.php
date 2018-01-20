@@ -1,8 +1,17 @@
 <?php
 
-if( !class_exists( 'SoundlushCustomPostNav' ) ) {
+/**
+ * Soundlush Custom Post Types Navigation Class
+ *
+ * @link http://codex.wordpress.org/Function_Reference/register_post_type
+ * @package soundlush
+ */
 
-  class SoundlushCustomPostNav {
+if( !class_exists( 'SoundlushCustomPostNav' ) )
+{
+
+  class SoundlushCustomPostNav
+  {
 
 
     public $post_type_name;

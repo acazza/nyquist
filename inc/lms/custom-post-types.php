@@ -9,6 +9,7 @@
 
 if( !class_exists( 'SoundlushCustomPostType' ) )
 {
+  
   class SoundlushCustomPostType
   {
 

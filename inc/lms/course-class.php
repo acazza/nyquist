@@ -1,9 +1,11 @@
 <?php
 
 
-if( !class_exists( 'SoundlushBook') ){
+if( !class_exists( 'SoundlushBook') )
+{
 
-  class SoundlushBook extends SoundlushCustomPostType {
+  class SoundlushBook extends SoundlushCustomPostType
+  {
 
     public function create_book()
     {

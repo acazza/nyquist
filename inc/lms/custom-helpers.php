@@ -1,9 +1,17 @@
 <?php
 
-if( !class_exists( 'SoundlushHelpers') ){
+/**
+ * Soundlush Custom Post Helpers
+ *
+ * @link http://codex.wordpress.org/Function_Reference/register_post_type
+ * @package soundlush
+ */
 
-  class SoundlushHelpers {
+if( !class_exists( 'SoundlushHelpers') )
+{
 
+  class SoundlushHelpers
+  {
 
     /**
      * Flush rewrite rules for custom post types on theme (de)activation.
