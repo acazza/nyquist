@@ -25,6 +25,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     public function __construct( $name, $args = array(), $labels = array() )
     {
+
       // Set some important variables
       $this->post_type_name    = SoundlushHelpers::uglify( $name );
       $this->post_type_args    = $args;
@@ -253,44 +254,45 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       add_action( 'add_meta_boxes',
         function() use( $taxonomy_name, $post_type_name, $type )
         {
-          add_meta_box( 'mytaxonomy_id', $taxonomy_name,
-          function() use( $taxonomy_name, $type )
-          {
-            global $post;
+          $name = SoundlushHelpers::beautify( $taxonomy_name );
+          add_meta_box( 'mytaxonomy_id', $name,
+            function() use( $taxonomy_name, $type )
+            {
+              global $post;
 
-            //Set up the taxonomy object and get terms
-            $taxonomy_name = $taxonomy_name;
-            $tax = get_taxonomy($taxonomy_name);
-            $terms = get_terms($taxonomy_name, array('hide_empty' => 0));
+              //Set up the taxonomy object and get terms
+              $taxonomy_name = $taxonomy_name;
+              $tax = get_taxonomy($taxonomy_name);
+              $terms = get_terms($taxonomy_name, array('hide_empty' => 0));
 
-            //Name of the form
-            $name = 'tax_input[' . $taxonomy_name . ']';
+              //Name of the form
+              $name = 'tax_input[' . $taxonomy_name . ']';
 
-            $postterms = get_the_terms( $post->ID, $taxonomy_name );
-            $current = ($postterms ? array_pop($postterms) : false);
-            $current = ($current ? $current->term_id : 0);
+              $postterms = get_the_terms( $post->ID, $taxonomy_name );
+              $current = ($postterms ? array_pop($postterms) : false);
+              $current = ($current ? $current->term_id : 0);
 
-            // Check taxonomy input type
-            switch($type){
-              case 'radio': ?>
-                <!-- Display taxonomy terms -->
-                <div id="taxonomy-<?php echo $taxonomy_name; ?>" class="categorydiv">
-                  <div id="<?php echo $taxonomy_name; ?>-all" class="tabs-panel">
-                    <ul id="<?php echo $taxonomy_name; ?>checklist" class="list:<?php echo $taxonomy_name?> categorychecklist form-no-clear">
-                      <?php   foreach($terms as $term){
-                          $id = $taxonomy_name.'-'.$term->term_id;
-                          echo "<li id='$id'><label class='selectit'>";
-                          echo "<input type='radio' id='in-$id' name='{$name}'".checked($current,$term->term_id,false)."value='$term->term_id' />$term->name<br />";
-                          echo "</label></li>";
-                      }?>
-                    </ul>
+              // Check taxonomy input type
+              switch($type){
+                case 'radio': ?>
+                  <!-- Display taxonomy terms -->
+                  <div id="taxonomy-<?php echo $taxonomy_name; ?>" class="categorydiv">
+                    <div id="<?php echo $taxonomy_name; ?>-all" class="tabs-panel">
+                      <ul id="<?php echo $taxonomy_name; ?>checklist" class="list:<?php echo $taxonomy_name?> categorychecklist form-no-clear">
+                        <?php   foreach($terms as $term){
+                            $id = $taxonomy_name.'-'.$term->term_id;
+                            echo "<li id='$id'><label class='selectit'>";
+                            echo "<input type='radio' id='in-$id' name='{$name}'".checked($current,$term->term_id,false)."value='$term->term_id' />$term->name<br />";
+                            echo "</label></li>";
+                        }?>
+                      </ul>
+                    </div>
                   </div>
-                </div>
-                <?php
-                break;
+                  <?php
+                  break;
+              }
             }
-          }
-         ,$post_type_name ,'side','core');
+            ,$post_type_name ,'side','core');
         }
       );
     }
@@ -304,7 +306,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     public function add_custom_fields( $custom_array )
     {
-      if( !empty( $custom_array ) )
+      if( ! empty( $custom_array ) )
       {
         // We need to know the Post Type name again
         $post_type_name = $this->post_type_name; // book
@@ -413,26 +415,27 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         {
 
           global $post;
-          $post_id = $post->ID;
-
+          //$post_id = $post->ID; //TODO this is triggering error
 
           // Deny the WordPress autosave function
-          if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+          if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return; //return $post->ID;
 
 
           // Verify nonce
           if ( !isset($_POST['custom_post_type_nonce']) || !wp_verify_nonce( $_POST['custom_post_type_nonce'], basename(__FILE__) ) )
           {
-            return $post_id;
+            return;
+            //return $post->ID;
           }
 
 
           // Check permissions
           if ('page' == $_POST['custom_post_type_nonce'])
           {
-            if ( !current_user_can('edit_page', $post_id ) || !current_user_can('edit_post', $post_id  ) )
+            if ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  ) )
             {
-              return $post_id;
+              return;
+              //return $post->ID;
             }
           }
 
@@ -441,20 +444,22 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
           {
             global $fields;
 
-            // Checks for input and sanitizes/saves if needed
-            foreach ( $fields as $field )
-            {
-              if( isset( $_POST[$field['id']] ) )
+            if( $fields  && ! empty( $fields ) ){
+
+              // Checks for input and sanitizes/saves if needed
+              foreach ( $fields as $field )
               {
-                if( $field['type'] = 'editor' ) {
-                  $new = htmlspecialchars( $_POST[ $field['id'] ] );
-                } else {
-                  $new = sanitize_text_field( $_POST[ $field['id'] ] );
+                if( isset( $_POST[$field['id']] ) )
+                {
+                  if( $field['type'] = 'editor' ) {
+                    $new = htmlspecialchars( $_POST[ $field['id'] ] );
+                  } else {
+                    $new = sanitize_text_field( $_POST[ $field['id'] ] );
+                  }
+                  update_post_meta( $post_id, $field['id'],  $new );
                 }
-                update_post_meta( $post_id, $field['id'],  $new );
               }
             }
-
           }
         }
       );

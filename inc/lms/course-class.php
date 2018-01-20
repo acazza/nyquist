@@ -65,11 +65,6 @@ if( !class_exists( 'SoundlushBook') ){
         )
       );
 
-          // array(
-          //     'label' => 'Select Box',
-          //     'desc'  => 'A description for the field.',
-          //     'id'    => $prefix.'select',
-          //     'type'  => 'select',
           //     'options' => array (
           //         'one' => array (
           //             'label' => 'Option One',
@@ -87,9 +82,30 @@ if( !class_exists( 'SoundlushBook') ){
           // )
 
     }
+
+
+
+
   }
 }
 
-$book = new SoundlushBook('Book');
+
+
+// Create Books Post Type
+$book_args = array(
+  'hierarchical' => true,
+  'supports'     => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'page-attributes')
+);
+$book = new SoundlushBook('Book', $book_args);
 $book->create_book();
-//$mb = new SoundlushRadioTaxonomy('book', 'author' );
+
+
+// Create Enciclopedia Post Type
+$encyc_args = array(
+  'hierarchical' => true,
+);
+$encyclopedia = new SoundlushCustomPostType('Encyclopedia', $encyc_args);
+
+
+// Create Parent-Child Relationship
+$rel = new SoundlushCustomPostRelationships( 'Encyclopedia', 'Book' );
