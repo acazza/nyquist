@@ -22,7 +22,12 @@
           get_template_part( 'template-parts/single', get_post_format() ); ?>
           <section class="article-navigation">
             <?php //the_post_navigation(); ?>
-            <?php nyquist_get_post_navigation(); ?>
+            <?php //nyquist_get_post_navigation(); ?>
+            <?php
+            $nav = new SoundlushCustomPostNav();
+            $nav->get_custom_post_nav('Book');
+            ?>
+
           </section>
           <?php if( comments_open() ): ?>
             <?php comments_template();?>
