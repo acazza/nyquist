@@ -9,7 +9,7 @@
  *
  * @link https://codex.wordpress.org/Template_Hierarchy
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 

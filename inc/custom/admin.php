@@ -1,13 +1,13 @@
 <?php
 /**
- * Nyquist Wordpress MegaMenu Admin Custom Fields
+ * Soundlush Wordpress MegaMenu Admin Custom Fields
  * @uses config/walker-nav-menu-edit.php
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 
 // create fields
-function nyquist_create_fields_list()
+function soundlush_create_fields_list()
 {
   //note that menu-item- gets prepended to field names
   return array(
@@ -21,9 +21,9 @@ function nyquist_create_fields_list()
 
 
 // setup fields
-function nyquist_setup_fields_list( $id, $item, $depth, $args )
+function soundlush_setup_fields_list( $id, $item, $depth, $args )
 {
-  $fields = nyquist_create_fields_list();
+  $fields = soundlush_create_fields_list();
 
   foreach ( $fields as $_key => $label ):
     $key = sprintf( 'menu-item-%s', $_key );
@@ -39,22 +39,22 @@ function nyquist_setup_fields_list( $id, $item, $depth, $args )
     <?php
   endforeach;
 }
-add_action( 'wp_nav_menu_item_custom_fields', 'nyquist_setup_fields_list', 10, 4 );
+add_action( 'wp_nav_menu_item_custom_fields', 'soundlush_setup_fields_list', 10, 4 );
 
 
 // show columns
-function nyquist_show_columns( $columns )
+function soundlush_show_columns( $columns )
 {
-  $fields = nyquist_create_fields_list();
+  $fields = soundlush_create_fields_list();
   $columns = array_merge( $columns, $fields );
   return $columns;
 }
-add_filter( 'manage_nav-menus_columns', 'nyquist_show_columns', 99 );
+add_filter( 'manage_nav-menus_columns', 'soundlush_show_columns', 99 );
 
 
 
 // save/update fields
-function nyquist_save_fields( $menu_id, $menu_item_db_id, $menu_item_args )
+function soundlush_save_fields( $menu_id, $menu_item_db_id, $menu_item_args )
 {
   // stop function if auto-save is in progress
   if( defined( 'DOING_AJAX' ) && DOING_AJAX ) :
@@ -64,7 +64,7 @@ function nyquist_save_fields( $menu_id, $menu_item_db_id, $menu_item_args )
   // check if action is triggered from admin panel of your website
   check_admin_referer( 'update-nav_menu', 'update-nav-menu-nonce' );
 
-  $fields = nyquist_create_fields_list();
+  $fields = soundlush_create_fields_list();
 
   foreach ($fields as $_key => $label) :
     
@@ -86,7 +86,7 @@ function nyquist_save_fields( $menu_id, $menu_item_db_id, $menu_item_args )
 
   endforeach;
 }
-add_action( 'wp_update_nav_menu_item', 'nyquist_save_fields', 10, 3 );
+add_action( 'wp_update_nav_menu_item', 'soundlush_save_fields', 10, 3 );
 
 
 
@@ -95,7 +95,7 @@ add_action( 'wp_update_nav_menu_item', 'nyquist_save_fields', 10, 3 );
  * @uses config/walker-nav-menu-edit.php
  */
 
-function nyquist_update_megamenu_walker_nav( $walker )
+function soundlush_update_megamenu_walker_nav( $walker )
 {
   $walker = 'MegaMenu_Walker_Nav_Menu_Edit';
   if( !class_exists( $walker ) ):
@@ -103,4 +103,4 @@ function nyquist_update_megamenu_walker_nav( $walker )
   endif;
   return $walker;
 }
-add_filter( 'wp_edit_nav_menu_walker', 'nyquist_update_megamenu_walker_nav', 99 );
+add_filter( 'wp_edit_nav_menu_walker', 'soundlush_update_megamenu_walker_nav', 99 );

@@ -6,7 +6,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 
@@ -63,8 +63,8 @@
     <div class="hero">
       <div class="container">
         <div class="hero-logo"></div>
-        <h1 class="hero-headline"><?php echo get_theme_mod( 'nyquist_custom_hero_headline', 'Create professional sounding music' ); ?></h1>
-        <h4 class="hero-lead"><?php echo get_theme_mod( 'nyquist_custom_hero_lead', "Our mission is to teach you how" ); ?></h4>
+        <h1 class="hero-headline"><?php echo get_theme_mod( 'soundlush_custom_hero_headline', 'Create professional sounding music' ); ?></h1>
+        <h4 class="hero-lead"><?php echo get_theme_mod( 'soundlush_custom_hero_lead', "Our mission is to teach you how" ); ?></h4>
         <div class="hero-cta-area"></div>
       </div> <!-- .container -->
     </div> <!-- .hero -->

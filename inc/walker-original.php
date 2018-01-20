@@ -1,10 +1,10 @@
 <?php
 /**
- * Nyquist Collection of Walker Class
+ * Soundlush Collection of Walker Class
  *
  * @link https://codex.wordpress.org/Class_Reference/Walker
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 class Walker_Nav_Primary extends Walker_Nav_Menu

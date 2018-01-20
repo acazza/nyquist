@@ -4,20 +4,20 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class( 'nyquist-format-link' ); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'soundlush-format-link' ); ?>>
 
   <header class="entry-header">
     <?php
-      $link = nyquist_grab_url();
-      the_title( '<h2 class="entry-title"><a href="' . $link . '" target="_blank">', '<div class="link-icon">' .  nyquist_get_svg( array( 'icon' => esc_attr( 'link' ) ) )  .  '</div></a></h2>')
+      $link = soundlush_grab_url();
+      the_title( '<h2 class="entry-title"><a href="' . $link . '" target="_blank">', '<div class="link-icon">' .  soundlush_get_svg( array( 'icon' => esc_attr( 'link' ) ) )  .  '</div></a></h2>')
     ?>
 
     <div class="entry-meta">
-      <?php echo nyquist_posted_meta(); ?>
+      <?php echo soundlush_posted_meta(); ?>
     </div>
 
   </header>

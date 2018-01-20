@@ -4,11 +4,11 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class( 'nyquist-format-quote' ); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'soundlush-format-quote' ); ?>>
 
   <header class="entry-header">
     <div class="container-narrow">
@@ -18,7 +18,7 @@
   </header>
 
   <footer class="entry-footer">
-    <?php echo nyquist_posted_footer(); ?>
+    <?php echo soundlush_posted_footer(); ?>
     <hr>
   </footer>
 

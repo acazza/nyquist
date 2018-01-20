@@ -13,7 +13,6 @@ if( !class_exists( 'SoundlushCustomPostNav' ) )
   class SoundlushCustomPostNav
   {
 
-
     public $post_type_name;
 
     /**
@@ -23,9 +22,7 @@ if( !class_exists( 'SoundlushCustomPostNav' ) )
 
     public function get_custom_post_nav($post_type) {
 
-
       $this->post_type_name = SoundlushHelpers::uglify( $post_type );
-
 
       if ( is_singular( $this->post_type_name ) ) {
 

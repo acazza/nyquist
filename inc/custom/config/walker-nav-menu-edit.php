@@ -1,8 +1,8 @@
 <?php
 /**
- * Nyquist Wordpress Custom Walker for Nav Menu Editor
+ * Soundlush Wordpress Custom Walker for Nav Menu Editor
  * @used-by ../admin.php
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 

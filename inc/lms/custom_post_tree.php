@@ -17,7 +17,6 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
     public $child;
 
 
-
     public function __construct( $parent, $child )
     {
       // Set variables

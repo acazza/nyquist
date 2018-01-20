@@ -4,7 +4,7 @@
  *
  * @link https://jetpack.com/
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 /**
@@ -14,11 +14,11 @@
  * See: https://jetpack.com/support/responsive-videos/
  * See: https://jetpack.com/support/content-options/
  */
-function nyquist_jetpack_setup() {
+function soundlush_jetpack_setup() {
 	// Add theme support for Infinite Scroll.
 	add_theme_support( 'infinite-scroll', array(
 		'container' => 'main',
-		'render'    => 'nyquist_infinite_scroll_render',
+		'render'    => 'soundlush_infinite_scroll_render',
 		'footer'    => 'page',
 	) );
 
@@ -28,7 +28,7 @@ function nyquist_jetpack_setup() {
 	// Add theme support for Content Options.
 	add_theme_support( 'jetpack-content-options', array(
 		'post-details' => array(
-			'stylesheet' => 'nyquist-style',
+			'stylesheet' => 'soundlush-style',
 			'date'       => '.posted-on',
 			'categories' => '.cat-links',
 			'tags'       => '.tags-links',
@@ -37,12 +37,12 @@ function nyquist_jetpack_setup() {
 		),
 	) );
 }
-add_action( 'after_setup_theme', 'nyquist_jetpack_setup' );
+add_action( 'after_setup_theme', 'soundlush_jetpack_setup' );
 
 /**
  * Custom render function for Infinite Scroll.
  */
-function nyquist_infinite_scroll_render() {
+function soundlush_infinite_scroll_render() {
 	while ( have_posts() ) {
 		the_post();
 		if ( is_search() ) :

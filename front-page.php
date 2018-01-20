@@ -1,10 +1,10 @@
 <?php
 /**
- * Template Nyquist Frontpage
+ * Template Soundlush Frontpage
  *
  * @link https://developer.wordpress.org/themes/template-files-section/page-template-files/
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 

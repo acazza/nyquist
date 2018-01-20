@@ -4,7 +4,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 
@@ -17,7 +17,7 @@
       if( have_posts() ):
         while( have_posts() ): the_post();
 
-          nyquist_save_post_views( get_the_ID() );
+          soundlush_save_post_views( get_the_ID() );
 
           get_template_part( 'template-parts/single', get_post_format() ); ?>
           <section class="article-navigation">

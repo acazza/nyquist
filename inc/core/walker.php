@@ -1,10 +1,10 @@
 <?php
 /**
- * Nyquist Walker Class Extention
+ * Soundlush Walker Class Extention
  * Adds basic functionalities (dropdowns)
  * @link https://codex.wordpress.org/Class_Reference/Walker
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 class Walker_Nav_Primary extends Walker_Nav_Menu

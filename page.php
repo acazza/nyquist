@@ -4,7 +4,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 
@@ -17,7 +17,7 @@
       if( have_posts() ):
         while( have_posts() ): the_post();
       ?>
-        <article class="nyquist-page">
+        <article class="soundlush-page">
           <header class="entry-header">
             <?php the_title( '<h2 class="entry-title">', '</h2>' ); ?>
           </header>

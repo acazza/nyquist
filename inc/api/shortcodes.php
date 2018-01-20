@@ -1,13 +1,13 @@
 <?php
 /**
- * Nyquist Shortcodes
+ * Soundlush Shortcodes
  *
  * @link https://codex.wordpress.org/Shortcode_API
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
-function nyquist_shortcode_button( $atts, $content = null ){
+function soundlush_shortcode_button( $atts, $content = null ){
   // Get the attributes
   $atts = shortcode_atts(
     array(
@@ -29,12 +29,12 @@ function nyquist_shortcode_button( $atts, $content = null ){
 
 }
 
-add_shortcode( 'button', 'nyquist_shortcode_button' );
+add_shortcode( 'button', 'soundlush_shortcode_button' );
 // [button slug="articles" type="primary" outlined=true]Click me[/button]
 
 
 
-function nyquist_shortcode_card( $atts, $content = null ){
+function soundlush_shortcode_card( $atts, $content = null ){
   // Get the attributes
   $atts = shortcode_atts(
     array(
@@ -49,23 +49,23 @@ function nyquist_shortcode_card( $atts, $content = null ){
 
   // Return html
   $output .= '<div class = "individual-card" width = "' . $width . '%">';
-  $output .= '<div class = "card-icon"' . nyquist_print_svg( $atts[ 'icon' ] ) . '</div>';
+  $output .= '<div class = "card-icon"' . soundlush_print_svg( $atts[ 'icon' ] ) . '</div>';
   $output .= '<h4>' . $atts[ 'title' ] . '</h4>';
   $output .= '<p>' . $content . '</p>';
   $output .= '</div> <!-- .individual-card --> ';
   return $output;
 }
 
-add_shortcode( 'card', 'nyquist_shortcode_card' );
+add_shortcode( 'card', 'soundlush_shortcode_card' );
 // [card cards_per_row=3 icon="link" title="Conectivity"]We are the best ones[/card]
 
 
-function nyquist_shortcode_backtotop( $atts, $content = null ){
+function soundlush_shortcode_backtotop( $atts, $content = null ){
   ( empty( $content ) ) ? 'Back to Top' : $content;
   // Return html
   $output = '<a href="#" class="back-to-top">' . $content . '</a>';
   return $output;
 }
 
-add_shortcode( 'backtotop', 'nyquist_shortcode_backtotop' );
+add_shortcode( 'backtotop', 'soundlush_shortcode_backtotop' );
 // [backtotop]Back to Top[/backtotop]

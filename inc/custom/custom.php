@@ -1,12 +1,12 @@
 <?php
 /**
- * Nyquist Custom Functions
+ * Soundlush Custom Functions
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 
-function nyquist_posted_meta()
+function soundlush_posted_meta()
 {
   $posted_on = get_the_date();
   $categories = get_the_category();
@@ -26,12 +26,12 @@ function nyquist_posted_meta()
 }
 
 
-function nyquist_posted_footer()
+function soundlush_posted_footer()
 {
   $tags = get_the_tag_list('<div class="tags-list">', ' ', '</div>');
-  $tag_icon = nyquist_print_svg('tag');
+  $tag_icon = soundlush_print_svg('tag');
 
-  $comment_icon = nyquist_print_svg ( 'comment' );
+  $comment_icon = soundlush_print_svg ( 'comment' );
   $comments_num = get_comments_number();
 
   if( comments_open() ):
@@ -53,7 +53,7 @@ function nyquist_posted_footer()
 
 // Standard & Image Post Format
 
-function nyquist_get_attachment( $num = 1 )
+function soundlush_get_attachment( $num = 1 )
 {
   $output = '';
   if( has_post_thumbnail() && $num == 1):
@@ -79,7 +79,7 @@ function nyquist_get_attachment( $num = 1 )
 
 // Audio & Video Post Format
 
-function nyquist_get_embedded_media( $type = array() )
+function soundlush_get_embedded_media( $type = array() )
 {
   $content = do_shortcode( apply_filters( 'the_content', get_the_content() ) );
   $embed = get_media_embedded_in_content( $content, $type );
@@ -94,7 +94,7 @@ function nyquist_get_embedded_media( $type = array() )
 
 // Link Post Format
 
-function nyquist_grab_url()
+function soundlush_grab_url()
 {
   if (!preg_match( '/<a\s[^>]*?href=[\'"](.+?)[\'"]/i', get_the_content(), $links ) ):
     return false;
@@ -105,24 +105,24 @@ function nyquist_grab_url()
 
 // Post Navigation Section
 
-function nyquist_get_post_navigation()
+function soundlush_get_post_navigation()
 {
-    require( get_template_directory() . '/inc/templates/nyquist-post-nav.php' );
+    require( get_template_directory() . '/inc/templates/soundlush-post-nav.php' );
 }
 
 // Comment Navigation Section
 
-function nyquist_get_comment_navigation()
+function soundlush_get_comment_navigation()
 {
   if( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ):
-    require( get_template_directory() . '/inc/templates/nyquist-comment-nav.php' );
+    require( get_template_directory() . '/inc/templates/soundlush-comment-nav.php' );
   endif;
 }
 
 
 // Share Post Section
 
-function nyquist_share_post( $content )
+function soundlush_share_post( $content )
 {
   if( is_single() && !( is_product() ) && !( is_post_type( 'course' ) ) && !( is_post_type( 'lesson' ) ) ):
     $content .= '<div class="share-post"><h4>Share this</h4>';
@@ -134,8 +134,8 @@ function nyquist_share_post( $content )
     $facebook = 'https://facebook.com/sharer/sharer.php?u=' . $permalink;
 
     $content .= '<ul class="share-social-media">';
-    $content .= '<li><a class="share-button" href="' . $twitter . '" target="_blank" rel="nofollow">' . nyquist_print_svg('twitter') . '</a></li>';
-    $content .= '<li><a class="share-button" href="' . $facebook . '" target="_blank" rel="nofollow">' . nyquist_print_svg('facebook') . '</a></li>';
+    $content .= '<li><a class="share-button" href="' . $twitter . '" target="_blank" rel="nofollow">' . soundlush_print_svg('twitter') . '</a></li>';
+    $content .= '<li><a class="share-button" href="' . $facebook . '" target="_blank" rel="nofollow">' . soundlush_print_svg('facebook') . '</a></li>';
     $content .= '</ul></div> <!-- .share_post --> ';
 
     return $content;
@@ -143,12 +143,12 @@ function nyquist_share_post( $content )
     return $content;
   endif;
 }
-add_filter( 'the_content', 'nyquist_share_post' );
+add_filter( 'the_content', 'soundlush_share_post' );
 
 
 // Related Posts Section
 
-function nyquist_related_posts( $content )
+function soundlush_related_posts( $content )
 {
   if( is_single() ):
 
@@ -182,7 +182,7 @@ function nyquist_related_posts( $content )
 
           $content .= '<div class="related-thumbnail">';
           $content .= '<a href="' . get_the_permalink() . '">';
-          $content .= '<img src="' . nyquist_get_attachment() . '" height="100" width="150" >';
+          $content .= '<img src="' . soundlush_get_attachment() . '" height="100" width="150" >';
           $content .= get_the_title();
           $content .= '</a></div>';
 
@@ -199,12 +199,12 @@ function nyquist_related_posts( $content )
     return $content;
   endif;
 }
-add_filter( 'the_content', 'nyquist_related_posts' );
+add_filter( 'the_content', 'soundlush_related_posts' );
 
 
 // Latest Posts Section
 
-function nyquist_get_latest_posts( $number_posts = 1 )
+function soundlush_get_latest_posts( $number_posts = 1 )
 {
 
   $args = array(
@@ -229,7 +229,7 @@ function nyquist_get_latest_posts( $number_posts = 1 )
 
 // Featured Posts Section
 
-function nyquist_get_featured_posts( $num_posts = 3 )
+function soundlush_get_featured_posts( $num_posts = 3 )
 {
   // Get latest post
   $lastest= wp_get_recent_posts( array(
@@ -263,7 +263,7 @@ function nyquist_get_featured_posts( $num_posts = 3 )
 
       $output .= '<div class="related-thumbnail">';
       $output .= '<a href="' . get_the_permalink() . '">';
-      $output .= '<img src="' . nyquist_get_attachment() . '" height="100" width="150" >';
+      $output .= '<img src="' . soundlush_get_attachment() . '" height="100" width="150" >';
       $output .= get_the_title();
       $output .= '</a></div>';
 
@@ -276,12 +276,12 @@ function nyquist_get_featured_posts( $num_posts = 3 )
 }
 
 //Verify if user already bought a course (Course Page)
-function nyquist_check_purchase( $product )
+function soundlush_check_purchase( $product )
 {
   $current_user = wp_get_current_user();
   // make sure WooCommerce is actiee and determine if customer has bought product
   if( is_woocommerce_activated() && wc_customer_bought_product( $current_user->email, $current_user->ID, $product->ID) ){
-	  echo __( 'Product already purchased.', 'nyquist' );
+	  echo __( 'Product already purchased.', 'soundlush' );
     return true;
   } else {
     return false;

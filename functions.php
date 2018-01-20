@@ -1,10 +1,10 @@
 <?php
 /**
- * Nyquist Theme Functions
+ * Soundlush Theme Functions
  *
  * @link https://developer.wordpress.org/themes/basics/theme-functions/
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 require get_template_directory() . '/inc/core/mega-walker.php';

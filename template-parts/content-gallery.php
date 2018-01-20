@@ -4,24 +4,24 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class( 'nyquist-format-gallery' ); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'soundlush-format-gallery' ); ?>>
 
   <header class="entry-header">
 
     <?php
-    if( nyquist_get_attachment() ):
-      $attachments = nyquist_get_attachment(5);
+    if( soundlush_get_attachment() ):
+      $attachments = soundlush_get_attachment(5);
     endif
     ?>
 
     <?php the_title( '<h2 class="entry-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a></h2>') ?>
 
     <div class="entry-meta">
-      <?php echo nyquist_posted_meta(); ?>
+      <?php echo soundlush_posted_meta(); ?>
     </div>
   </header>
 
@@ -35,7 +35,7 @@
   </div> <!-- .entry-content -->
 
   <footer class="entry-footer">
-    <?php echo nyquist_posted_footer(); ?>
+    <?php echo soundlush_posted_footer(); ?>
     <hr>
   </footer>
 

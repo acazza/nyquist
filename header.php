@@ -6,7 +6,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 ?>
 

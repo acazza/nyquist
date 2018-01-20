@@ -1,23 +1,23 @@
 <?php
 /**
- * Nyquist Custom Widgets
+ * Soundlush Custom Widgets
  * All classes & custom functions for creation of theme widgets will be added here
  * @link https://codex.wordpress.org/Widgets_API
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 /**
  * === === === === === === === ===
- * Nyquist Popular Posts Widget
+ * Soundlush Popular Posts Widget
  * Retrieve the x more popular posts (based on view count)
  * === === === === === === === ===
  */
 
 // count/update post views and store info as post metadata
-function nyquist_save_post_views( $postID ){
+function soundlush_save_post_views( $postID ){
 
-  $metaKey = 'nyquist_post_views';
+  $metaKey = 'soundlush_post_views';
   $views = get_post_meta( $postID, $metaKey, true );
 
   $count = ( empty( $views ) ? 0 : $views );
@@ -29,16 +29,16 @@ remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0 );
 
 
 // Popular Posts Widget
-class NyquistPopularPostsWidget extends WP_Widget
+class SoundlushPopularPostsWidget extends WP_Widget
 {
    // setup the widget name, description, etc.
   public function __construct(){
       $widget_ops = array(
-        'classname' => 'nyquist-popular-posts',
-        'description' => __('Custom Nyquist Popular Posts Widget', 'nyquist' ),
+        'classname' => 'soundlush-popular-posts',
+        'description' => __('Custom Soundlush Popular Posts Widget', 'soundlush' ),
       );
 
-      parent::__construct('nyquist_popular', 'Nyquist Popular Posts', $widget_ops);
+      parent::__construct('soundlush_popular', 'Soundlush Popular Posts', $widget_ops);
   }
 
   // display at the backend
@@ -81,7 +81,7 @@ class NyquistPopularPostsWidget extends WP_Widget
     $posts_args = array(
       'post_type'       => 'post',
       'posts_per_page'  => $total,
-      'meta_key'        => 'nyquist_post_views',
+      'meta_key'        => 'soundlush_post_views',
       'orderby'         => 'meta_value_num',
       'order'           => 'DESC'
     );
@@ -108,27 +108,27 @@ class NyquistPopularPostsWidget extends WP_Widget
 }
 
 add_action('widgets_init', function(){
-  register_widget('NyquistPopularPostsWidget');
+  register_widget('SoundlushPopularPostsWidget');
 });
 
 
 
 /*
  * === === === === === === ===
- * Nyquist Social Media Widget
+ * Soundlush Social Media Widget
  * === === === === === === ===
  */
 
-class NyquistSocialWidget extends WP_Widget
+class SoundlushSocialWidget extends WP_Widget
 {
   // setup the widget name, description, etc.
   public function __construct(){
       $widget_ops = array(
-        'classname' => 'nyquist-social-widget',
-        'description' => 'Custom Nyquist Social Media Widget',
+        'classname' => 'soundlush-social-widget',
+        'description' => 'Custom Soundlush Social Media Widget',
       );
 
-      parent::__construct('nyquist_social', 'Nyquist Social Media', $widget_ops);
+      parent::__construct('soundlush_social', 'Soundlush Social Media', $widget_ops);
   }
 
   // display at the backend
@@ -145,26 +145,26 @@ class NyquistSocialWidget extends WP_Widget
 }
 
 add_action('widgets_init', function(){
-  register_widget('NyquistSocialWidget');
+  register_widget('SoundlushSocialWidget');
 });
 
 
 /*
  * === === === === === === ===
- * Nyquist Course Table of Content Widget
+ * Soundlush Course Table of Content Widget
  * === === === === === === ===
  */
 
- class NyquistCourseIndexWidget extends WP_Widget
+ class SoundlushCourseIndexWidget extends WP_Widget
  {
    // setup the widget name, description, etc.
    public function __construct(){
        $widget_ops = array(
-         'classname' => 'nyquist-course-index-widget',
-         'description' => 'Custom Nyquist Course Index Widget',
+         'classname' => 'soundlush-course-index-widget',
+         'description' => 'Custom Soundlush Course Index Widget',
        );
 
-       parent::__construct('nyquist_course_index', 'Nyquist Course Index', $widget_ops);
+       parent::__construct('soundlush_course_index', 'Soundlush Course Index', $widget_ops);
    }
 
    // display at the backend
@@ -240,19 +240,19 @@ add_action('widgets_init', function(){
  }
 
  add_action('widgets_init', function(){
-   register_widget('NyquistCourseIndexWidget');
+   register_widget('SoundlushCourseIndexWidget');
  });
 
 
 
 /*
  * === === === === === === ===
- * Nyquist Address Widget
+ * Soundlush Address Widget
  * === === === === === === ===
  */
 
  /*
   * === === === === === === ===
-  * Nyquist About Widget
+  * Soundlush About Widget
   * === === === === === === ===
   */

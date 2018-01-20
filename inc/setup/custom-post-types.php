@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Nyquist Custom Post Types and Taxonomy
+ * Soundlush Custom Post Types and Taxonomy
  *
  * @link http://codex.wordpress.org/Function_Reference/register_post_type
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 /* Courses Post Type */
@@ -356,7 +356,7 @@ function soundlush_get_lowest_level_taxonomy($post_id){
 /* Returns all lessons of a course grouped by a hierarchy of module */
 function soundlush_generate_course_index()
 {
-  echo '<h4>'. __( 'Course Outline', 'nyquist' ) . '</h4>';
+  echo '<h4>'. __( 'Course Outline', 'soundlush' ) . '</h4>';
 
   global $post;
 
@@ -484,5 +484,5 @@ function soundlush_lesson_post_nav() {
 
 //function soundlush_get_lesson_navigation()
 //{
-//    require( get_template_directory() . '/inc/templates/nyquist-lesson-nav.php' );
+//    require( get_template_directory() . '/inc/templates/soundlush-lesson-nav.php' );
 //}

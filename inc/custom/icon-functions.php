@@ -1,32 +1,32 @@
 <?php
 /**
- * Nyquist Icon Functions
+ * Soundlush Icon Functions
  *
- * @package Nyquist
+ * @package com.soundlush.theme.v1
  */
 
 // add svg sprite at the bottom of the document
- function nyquist_include_svg_icons(){
+ function soundlush_include_svg_icons(){
     //$svg_icons = get_template_directory() . '/assets/icon/svg-icons.svg';
     $svg_icons = get_template_directory() . '/assets/icon/inline.svg.php';
     if( file_exists( $svg_icons ) ):
       require_once( $svg_icons );
     endif;
  }
- add_action( 'wp_footer', 'nyquist_include_svg_icons', 9999 );
+ add_action( 'wp_footer', 'soundlush_include_svg_icons', 9999 );
 
 
 
- function nyquist_get_svg( $args ) {
+ function soundlush_get_svg( $args ) {
 
   // Make sure $args are an array.
 	if ( empty( $args ) ):
-		return __( 'Please define default parameters in the form of an array.', 'nyquist' );
+		return __( 'Please define default parameters in the form of an array.', 'soundlush' );
 	endif;
 
   // Define an icon.
 	if ( false === array_key_exists( 'icon', $args ) ) {
-		return __( 'Please define an SVG icon filename.', 'nyquist' );
+		return __( 'Please define an SVG icon filename.', 'soundlush' );
 	}
 	// Set defaults.
 	$defaults = array(
@@ -41,7 +41,7 @@
 	$aria_labelledby = '';
 
 	// Begin SVG markup.
-	$output = '<svg class="icon icon-nyquist icon-' . esc_attr( $args['icon'] ) . ' ' . esc_attr( $args['class'] ) .'"' . $aria_hidden . $aria_labelledby . ' role="img">';
+	$output = '<svg class="icon icon-soundlush icon-' . esc_attr( $args['icon'] ) . ' ' . esc_attr( $args['class'] ) .'"' . $aria_hidden . $aria_labelledby . ' role="img">';
 
   
 	/*
@@ -56,9 +56,9 @@
 
 
 // subsitute - not sanitized
-function nyquist_print_svg( $suffix ){
+function soundlush_print_svg( $suffix ){
   if( $suffix ):
-    $output = '<svg class="icon icon-nyquist icon-' . $suffix . '" aria-hidden="true" role="img"> <use href="#icon-' . $suffix . '" xlink:href="#icon-' . $suffix . '"></use></svg>';
+    $output = '<svg class="icon icon-soundlush icon-' . $suffix . '" aria-hidden="true" role="img"> <use href="#icon-' . $suffix . '" xlink:href="#icon-' . $suffix . '"></use></svg>';
     return $output;
   else:
     return;

@@ -77,7 +77,7 @@ article {
   .share-button{
     padding: 5px;
     margin-right: 5px;
-    .icon-nyquist{
+    .icon-soundlush{
       width: 20px;
       height: 20px;
       fill: $color_offwhite;
@@ -96,7 +96,7 @@ article {
         color: $color_offblack;
       }
     }
-    .icon-nyquist{
+    .icon-soundlush{
       width: 16px;
       height: 16px;
       display: inline-block;
@@ -131,7 +131,7 @@ article {
 === Image Post Format ===
 */
 
-article.nyquist-format-image{
+article.soundlush-format-image{
 
   .entry-header{
     @extend %text-shadow;
@@ -171,7 +171,7 @@ article.nyquist-format-image{
 === Audio Post Format ===
 */
 
-article.nyquist-format-audio{
+article.soundlush-format-audio{
 
   .entry-header{
     text-align: left;
@@ -203,7 +203,7 @@ article.nyquist-format-audio{
 === Video Post Format ===
 */
 
-article.nyquist-format-video{
+article.soundlush-format-video{
   .embed-responsive{
     position: relative;
     display: block;
@@ -233,7 +233,7 @@ article.nyquist-format-video{
 === Link Post Format ===
 */
 
-article.nyquist-format-link{
+article.soundlush-format-link{
 
   .entry-title{
     &:before, &:after{
@@ -258,7 +258,7 @@ article.nyquist-format-link{
     border-radius: 50%;
     color: $color_offwhite;
 
-    .icon-nyquist{
+    .icon-soundlush{
       margin: 0 auto;
       width: 60%;
       height: 60%;
@@ -278,7 +278,7 @@ article.nyquist-format-link{
 === Quote Post Format ===
 */
 
-article.nyquist-format-quote{
+article.soundlush-format-quote{
   .quote-content{
     margin: 0;
     padding: 0;
@@ -295,7 +295,7 @@ article.nyquist-format-quote{
 === Aside Post Format ===
 */
 
-article.nyquist-format-aside{
+article.soundlush-format-aside{
 
   .aside-container{
     background-color: $color_base_light;
@@ -326,7 +326,7 @@ article.nyquist-format-aside{
 === Single Post Template ===
 */
 
-article.nyquist-single{
+article.soundlush-single{
   margin-bottom: 0;
 }
 
