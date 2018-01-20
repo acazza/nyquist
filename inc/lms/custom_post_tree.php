@@ -62,8 +62,8 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
       $taxonomy_name = $taxonomy[0];
 
       // Get direct term associated with the post
-      $term_id = get_the_terms( $post_id, $taxonomy_name );
-
+      $term_obj = get_the_terms( $post_id, $taxonomy_name );
+      $term_id  = $term_obj[0]->term_id;
 
       // Get term ascestors from direct term
       $term_ancestors = get_ancestors($term_id, $taxonomy_name);
@@ -72,22 +72,27 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
       // Get all top level terms
       $top_level_terms = get_terms( $taxonomy_name,
         array(
-          'parent'        => 0,
-          'fields'        => 'ids',
-          'hide_empty'    => false,
+          'parent'     => 0,
+          'fields'     => 'ids',
+          'hide_empty' => false,
         )
       );
+
 
       // Compare arrays and retrieve top level term ancestor for post
       $top_ancestor     = array_intersect( $term_ancestors, $top_level_terms );
       $top_ancestor_id  = array_shift( $top_ancestor );
+
+
+      if( is_null($top_ancestor_id ) ) $top_ancestor_id = $term_id;
+
 
       // Get child terms from top ancestor
       $terms = get_terms($taxonomy_name,
         array(
           'orderby'   => 'parent',
           'order'     => 'ASC',
-          'child_of'   => $top_ancestor_id,
+          'child_of'  => $top_ancestor_id,
         )
       );
 
@@ -160,7 +165,7 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
           array(
             'taxonomy' => $taxonomy_name,
             'field'    => 'term_id',
-            'terms' => $term_id,
+            'terms'    => $term_id,
           ),
         ),
       );
@@ -176,14 +181,14 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
 
           $query->the_post();
 
-          $post_id = get_the_ID();
+          $post_id   = get_the_ID();
           $post_name = get_the_title();
           $post_link = get_the_permalink();
 
           // If module has children modules, only assign lesson to the lowest level module
           $post_term = get_the_terms( $post_id, $taxonomy_name );
 
-          if( $term_id == $post_term ) {
+          if( $term_id == $post_term[0]->term_id ) {
             $output .= '<li><a href="' . $post_link . '">'. $post_name . '</a></li>';
           }
 
