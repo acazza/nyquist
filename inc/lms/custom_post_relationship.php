@@ -37,9 +37,9 @@ if( !class_exists( 'SoundlushCustomPostRelationships') )
 
 
 
-    public function relate($dropdown_args, $post){
+    public function relate($dropdown_args){
 
-        //global $post;
+        global $post;
 
         if ( $this->post_type_children == $post->post_type ){
           $dropdown_args['post_type'] = $this->post_type_parent;

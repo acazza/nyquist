@@ -21,11 +21,10 @@
 
           get_template_part( 'template-parts/single', get_post_format() ); ?>
           <section class="article-navigation">
-            <?php //the_post_navigation(); ?>
-            <?php //nyquist_get_post_navigation(); ?>
             <?php
+            $post_type = get_post_type();
             $nav = new SoundlushCustomPostNav();
-            $nav->get_custom_post_nav('Book');
+            $nav->get_custom_post_nav( $post_type );
             ?>
 
           </section>

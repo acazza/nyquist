@@ -105,6 +105,7 @@ $book->create_book();
 // Create Enciclopedia Post Type
 $encyc_args = array(
   'hierarchical' => true,
+  'supports'     => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'page-attributes')
 );
 $encyclopedia = new SoundlushCustomPostType('Encyclopedia', $encyc_args);
 
