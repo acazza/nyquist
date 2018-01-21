@@ -57,18 +57,18 @@ if( !class_exists( 'SoundlushHelpers') )
     {
         $last = $string[strlen( $string ) - 1];
 
-        if( $last == 'y' )
-        {
+        switch( $last ){
+          case 'y': //convert y to ies
             $cut = substr( $string, 0, -1 );
-            //convert y to ies
             $plural = $cut . 'ies';
-        }
-        else
-        {
-            // just attach an s
+            break;
+          case 'z': //repeat last consonant and attach es
+            $plural = $string . 'zes';
+            break;
+          default: // just attach an s
             $plural = $string . 's';
+            break;
         }
-
         return $plural;
     }
   }

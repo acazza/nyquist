@@ -549,7 +549,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               }
             };
           }
-
+          //TODO, check if all content is <> "" and if at least one correct is marked
           update_post_meta( $post->ID, 'answers', $_POST['answers']);
         }
       );
