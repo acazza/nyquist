@@ -15,13 +15,15 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
 
     public $parent;
     public $child;
+    public $post_type_parent;
+    public $post_type_child;
 
 
     public function __construct( $parent, $child )
     {
       // Set variables
-      $this->parent   = SoundlushHelpers::uglify( $parent );
-      $this->child    = SoundlushHelpers::uglify( $child );
+      $this->post_type_parent   = SoundlushHelpers::uglify( $parent );
+      $this->post_type_child    = SoundlushHelpers::uglify( $child );
 
       $this->create_tree();
     }
@@ -32,13 +34,13 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
     {
       global $post;
 
-      if( $post->post_type == $this->parent ) {
+      if( $post->post_type == $this->post_type_parent ) {
 
         $parent_id = $post->ID;
 
         $children = get_children( array(
         	'post_parent' => $parent_id,
-        	'post_type'   => $this->child,
+        	'post_type'   => $this->post_type_child,
         	'numberposts' => 1,
         	'post_status' => 'publish'
           )
@@ -46,7 +48,7 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
 
         $post_id = current($children)->ID;
 
-      } elseif( $post->post_type == $this->child ){
+      } elseif( $post->post_type == $this->post_type_child ){
 
         $post_id = $post->ID;
 
@@ -132,11 +134,11 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
 
       global $post;
 
-      if( $post->post_type == $this->parent ) {
+      if( $post->post_type == $this->post_type_parent ) {
 
         $parent_id = $post->ID;
 
-      }elseif( $post->post_type == $this->child ){
+      }elseif( $post->post_type == $this->post_type_child ){
 
         $parent_id = get_post_ancestors( $post->ID );
 
@@ -151,9 +153,9 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
       $taxonomy_name = $taxonomy[0];
 
 
-      // WP_Query arguments: Check if module have lessons that are children of current course
+      // WP_Query arguments: Check if taxonomy term has children that are children of current parent
       $args = array(
-        'post_type'       => $this->child,
+        'post_type'       => $this->post_type_child,
         'post_parent'     => $parent_id,
         'fields'          => 'ids',
         'post_status'     => 'publish',
@@ -184,7 +186,7 @@ if( !class_exists( 'SoundlushCustomPostTree' ) )
           $post_name = get_the_title();
           $post_link = get_the_permalink();
 
-          // If module has children modules, only assign lesson to the lowest level module
+          // If term has children terms, assign child posrt to the lowest level term
           $post_term = get_the_terms( $post_id, $taxonomy_name );
 
           if( $term_id == $post_term[0]->term_id ) {

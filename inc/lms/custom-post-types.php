@@ -401,6 +401,95 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
 
 
+     /**
+      * Attaches dynamic custom field meta boxes to the post type
+      * @param $custom_fields
+      */
+
+    function add_dynamic_custom_fields( $custom_array )
+    {
+      if( ! empty( $custom_array ) )
+      {
+        // We need to know the Post Type name again
+        $post_type_name = $this->post_type_name; // question
+
+        global $fields;
+
+        // Meta variables
+        $box_id         = SoundlushHelpers::uglify( $custom_array['id'] ); //TODO FALLBACK
+        $box_title      = SoundlushHelpers::beautify( $custom_array['title'] ); //TODO FALLBACK
+        $box_context    = $custom_array['context'] ? $custom_array['context'] : 'normal';
+        $box_priority   = $custom_array['priority'] ? $custom_array['priority'] : 'default';
+        $fields         = $custom_array['fields'];
+      }
+
+      add_action( 'add_meta_boxes',
+        function() use( $box_id, $box_title, $post_type_name, $box_context, $box_priority, $fields )
+        {
+          add_meta_box(
+            $box_id,
+            $box_title,
+            function( $post, $data ) use( $fields )
+            {
+              global $post;
+
+              wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' ); ?>
+
+              <div id="meta_inner">
+
+              <?php
+              //get the saved meta as an array
+              $meta = get_post_meta( $post->ID, 'answers', false );
+
+              $c = 0;
+              if( is_array($meta) )
+              {
+                foreach($meta as $answers )
+                {
+                  foreach( $answers as $answer )
+                  {
+                    if( isset( $answer['content'] ) || isset( $answer['correct'] ) )
+                    {
+                      printf( '<div><label for="answers[%1$s][content]">Answer: </label><input type="text" name="answers[%1$s][content]" value="%2$s" /><label for="answers[%1$s][correct]"><input type="checkbox" name="answers[%1$s][correct]" %3$s />Correct</label><button class="remove">%4$s</button></div>', $c, $answer['content'], isset($answer['correct']) ? 'checked' : '', __( 'Remove Answer' ) );
+                      $c = $c +1;
+                    }
+                  }
+                }
+              }
+              ?>
+              <span id="here"></span>
+              <button class="add"><?php _e('Add Answers'); ?></button>
+
+              <script>
+                  var $ =jQuery.noConflict();
+                  $(document).ready(function() {
+                    var count = <?php echo $c; ?>;
+                    $(".add").click(function() {
+                        count = count + 1;
+                        if( count < 6 ){
+                          $('#here').append('<div><label for="answers['+count+'][content]">Answer: </label><input type="text" name="answers['+count+'][content]" value="" /> <label for ="answers['+count+'][correct]"><input type="checkbox" name="answers['+count+'][correct]" />Correct</label><button class="remove">Remove Answer</button></div>' );
+                          return false;
+                        }
+                    });
+                    $(".remove").live('click', function() {
+                        $(this).parent().remove();
+                    });
+                  });
+              </script>
+              </div>
+              <?php
+              },
+              $post_type_name,
+              $box_context,
+              $box_priority
+              //array( $fields )
+          );
+        }
+      );
+    }
+
+
+
     /**
      * Listens for when the post type is being saved
      * @param
@@ -416,7 +505,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         {
 
           global $post;
-          //$post_id = $post->ID; //TODO this is triggering error
 
           // Deny the WordPress autosave function
           if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return; //return $post->ID;
@@ -426,7 +514,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
           if ( !isset($_POST['custom_post_type_nonce']) || !wp_verify_nonce( $_POST['custom_post_type_nonce'], basename(__FILE__) ) )
           {
             return;
-            //return $post->ID;
           }
 
 
@@ -436,14 +523,14 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
             if ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  ) )
             {
               return;
-              //return $post->ID;
             }
           }
 
-
+          // Save Static Custom Fields
           if( isset( $_POST ) && isset( $post->ID ) && get_post_type( $post->ID ) == $post_type_name )
           {
             global $fields;
+
 
             if( $fields  && ! empty( $fields ) ){
 
@@ -457,11 +544,13 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                   } else {
                     $new = sanitize_text_field( $_POST[ $field['id'] ] );
                   }
-                  update_post_meta( $post_id, $field['id'],  $new );
+                  update_post_meta( $post->ID, $field['id'],  $new );
                 }
               }
-            }
+            };
           }
+
+          update_post_meta( $post->ID, 'answers', $_POST['answers']);
         }
       );
 
