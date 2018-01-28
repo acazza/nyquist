@@ -433,92 +433,46 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
             {
               global $post;
 
-              wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' );
+              wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' ); ?>
 
-              echo '<div id="meta_inner">';
+              <div id="meta_inner">
 
+              <?php
               //get the saved meta as an array
               $meta = get_post_meta( $post->ID, 'answers', false );
 
               $c = 0;
-              $output = '';
-
-              var_dump($meta);
-              if( is_array( $meta ) && ( ! empty( $meta ) || ! isset( $meta ) ) )
+              if( is_array( $meta ) )
               {
-                foreach( $meta as $key=>$values )
+                foreach( $meta as $answers )
                 {
-                    foreach( $values as $index => $answer )
-                    {
-                      var_dump($answer);
-                      echo '<div class="repeater">';
-
-                      $output = '';
-
-                      foreach( $fields as $field )
-                      {
-                        switch ( $field['type'] ) {
-                          case 'text':
-                            echo '<label for="answers[' . $c . '][' . $field['id'] . ']" >' . $field['name'] . ': </label>';
-                            echo '<input type="text" name="answers[' . $c . '][' . $field['id'] . ']" value="' . $answer[ $field['id'] ] . '" />';
-
-                            $output .= '<label for="answers[banana][' . $field['id'] . ']" >' . $field['name'] . ': </label><input type="text" name="answers[banana][' . $field['id'] . ']"/>';
-                            break;
-
-                          case 'checkbox':
-                            echo '<label for="answers[' . $c . '][' . $field['id'] . ']" >';
-                            echo '<input type="checkbox" name="answers[' . $c . '][' . $field['id'] . ']" ' . (isset($answer[ $field['id'] ]) ? "checked" : '') . '/>';
-                            echo $field['name'] . '</label>';
-
-                            $output .= '<label for="answers[banana][' . $field['id'] . ']" ><input type="checkbox" name="answers[banana][' . $field['id'] . ']"/>' . $field['name'] . '</label>';
-
-                            break;
-                        }
-
-                      }
-                      $c = $c +1;
-                      echo '<button class="remove">' .  __( 'Remove Item' ) .  '</button>';
-                      echo '</div>';
-                    }
-                  }
-                } else {
-
-                  foreach( $fields as $field )
+                  foreach( $answers as $answer )
                   {
-                    switch ( $field['type'] ) {
-                      case 'text':
-                        $output .= '<label for="answers[banana][' . $field['id'] . ']" >' . $field['name'] . ': </label><input type="text" name="answers[banana][' . $field['id'] . ']"/>';
-                        break;
-
-                      case 'checkbox':
-                        $output .= '<label for="answers[banana][' . $field['id'] . ']" ><input type="checkbox" name="answers[banana][' . $field['id'] . ']"/>' . $field['name'] . '</label>';
-                        break;
+                    if( isset( $answer['content'] ) || isset( $answer['correct'] ) )
+                    {
+                      printf( '<div><label for="answers[%1$s][content]">Answer: </label><input type="text" name="answers[%1$s][content]" value="%2$s" /><label for="answers[%1$s][correct]"><input type="checkbox" name="answers[%1$s][correct]" %3$s />Correct</label><button class="remove">%4$s</button></div>', $c, $answer['content'], isset($answer['correct']) ? 'checked' : '', __( 'Remove Answer' ) );
+                      $c = $c +1;
                     }
                   }
-
                 }
-
-
+              }
               ?>
               <span id="here"></span>
-              <button class="add"><?php _e( 'Add Item' ); ?></button>
+              <button class="add"><?php _e( 'Add Answers' ); ?></button>
 
               <script>
                   var $ =jQuery.noConflict();
                   $( document ).ready( function()
                   {
                     var count = <?php echo $c; ?>;
-                    var output = '<?php echo $output; ?>';
-
                     $( ".add" ).click( function()
                     {
                         count = count + 1;
-                        var res = output.replace(/banana/g, count);
-
-                        $('#here').append('<div>'+ res +'<button class="remove">Remove Answer</button></div>' );
-
-                        return false;
-                    //}
+                        if( count < 6 )
+                        {
+                          $('#here').append('<div><label for="answers['+count+'][content]">Answer: </label><input type="text" name="answers['+count+'][content]" value="" /> <label for ="answers['+count+'][correct]"><input type="checkbox" name="answers['+count+'][correct]" />Correct</label><button class="remove">Remove Answer</button></div>' );
+                          return false;
+                        }
                     });
 
                     $( ".remove" ).live( 'click', function() {
@@ -526,9 +480,8 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     });
 
                   });
-
               </script>
-              </div> <!-- #meta_inner -->
+              </div>
               <?php
               },
               $post_type_name,

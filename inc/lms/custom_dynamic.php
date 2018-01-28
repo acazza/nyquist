@@ -42,7 +42,7 @@ if( !class_exists( 'SoundlushDynamic') )
                 $answers = get_post_meta( $post->ID, 'answers', false );
                 var_dump($answers);
                 $c = 0;
-                if ( count( $answers ) > 0 ) {
+                if ( count( $answers ) > 0  && is_array( $answers ) ) {
                     foreach( $answers as $answer ) {
                         if ( isset( $answer['content'] ) || isset( $answer['correct'] ) ) {
                             printf( '<div><label for="answers[%1$s][content]">Answer: </label><input type="text" name="answers[%1$s][content]" value="%2$s" /><label for="answers[%1$s][correct]"><input type="checkbox" name="answers[%1$s][correct]" "%3$s" />Correct</label><button class="remove">%4$s</button></div>', $c, $answer['content'], $answer['correct'] ? 'checked' : '', __( 'Remove Answer' ) );
@@ -50,23 +50,23 @@ if( !class_exists( 'SoundlushDynamic') )
                         }
                     }
                 }
-
-                ?>
+              ?>
             <span id="here"></span>
-            <button class="add"><?php _e('Add Answers'); ?></button>
+            <button class="add"><?php _e( 'Add Answers' ); ?></button>
+
             <script>
                 var $ =jQuery.noConflict();
-                $(document).ready(function() {
+                $( document ).ready( function() {
                     var count = <?php echo $c; ?>;
-                    $(".add").click(function() {
+                    $( ".add" ).click( function() {
                         count = count + 1;
                         if( count < 6 ){
                         $('#here').append('<div><label for="answers['+count+'][content]">Answer: </label><input type="text" name="answers['+count+'][content]" value="" /> <label for ="answers['+count+'][correct]"><input type="checkbox" name="answers['+count+'][correct]" />Correct</label><button class="remove">Remove Answer</button></div>' );
                         return false;
                         }
                     });
-                    $(".remove").live('click', function() {
-                        $(this).parent().remove();
+                    $( ".remove" ).live( 'click', function() {
+                        $( this ).parent().remove();
                     });
                 });
                 </script>

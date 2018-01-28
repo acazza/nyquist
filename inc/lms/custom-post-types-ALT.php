@@ -443,24 +443,21 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               $c = 0;
               $output = '';
 
-              var_dump($meta);
-              if( is_array( $meta ) && ( ! empty( $meta ) || ! isset( $meta ) ) )
+              if( is_array( $meta ) && !is_null($meta[0]) )
               {
-                foreach( $meta as $key=>$values )
+                var_dump($meta);
+                foreach( $meta as $answers )
                 {
-                    foreach( $values as $index => $answer )
+                    foreach( $answers as $answer )
                     {
-                      var_dump($answer);
                       echo '<div class="repeater">';
-
-                      $output = '';
 
                       foreach( $fields as $field )
                       {
                         switch ( $field['type'] ) {
                           case 'text':
                             echo '<label for="answers[' . $c . '][' . $field['id'] . ']" >' . $field['name'] . ': </label>';
-                            echo '<input type="text" name="answers[' . $c . '][' . $field['id'] . ']" value="' . $answer[ $field['id'] ] . '" />';
+                            echo '<input type="text" name="answers[' . $c . '][' . $field['id'] . ']" value="' . isset($answer[ $field['id'] ]) ? $answer[ $field['id'] ]: '' . '" />';
 
                             $output .= '<label for="answers[banana][' . $field['id'] . ']" >' . $field['name'] . ': </label><input type="text" name="answers[banana][' . $field['id'] . ']"/>';
                             break;
@@ -482,7 +479,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     }
                   }
                 } else {
-
                   foreach( $fields as $field )
                   {
                     switch ( $field['type'] ) {

@@ -222,14 +222,28 @@ $question_args = array(
   'supports'     => array( 'title', 'editor', 'page-attributes')
 );
 $question = new SoundlushCustomPostType('Question', $question_args);
-//$question = new SoundlushQuestions('Question', $question_args);
-//$question->create_answers();
 
 $question->add_dynamic_custom_fields(
   array(
     'id'        => 'answer_info',
     'title'     => __( 'Answer Info' ),
-    'fields'    => "",
+    'fields'    => array(
+      array(
+          'name'      => 'Answers',
+          //'desc'      => 'Enter video host here.',
+          'id'        =>  'content',
+          //'std'       => 'Default value here.',
+          'type'      => 'text',
+          //'options'   => array( 'Youtube', 'Vimeo', 'Self hosted' )
+      ),
+      array(
+          'name'      => 'Correct',
+          //'desc'      => 'Enter video url here.',
+          'id'        => 'correct',
+          //'std'       => 'Default value here.',
+          'type'      => 'checkbox'
+      )
+    ),
     'context'   => 'normal',
     'priority'  => 'default',
   )
