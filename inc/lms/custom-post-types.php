@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Soundlush Custom Post Types/Taxonomy Class
  *
@@ -171,7 +170,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
       if( ! taxonomy_exists( $taxonomy_name ) )
       {
-        // Create taxonomy and attach it to the object type (post type)
 
         //Capitilize the words and make it plural
         $name       = SoundlushHelpers::beautify( $name );
@@ -233,6 +231,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       // Generate custom metabox input type
       if ($type != 'check' ) $this->setup_custom_metabox($taxonomy_name, $post_type_name, $type);
     }
+
 
 
     /**
@@ -343,6 +342,8 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
                     $meta = get_post_meta( $post->ID, $field['id'], true );
 
+                    var_dump($meta);
+
                     echo '<label for="', $field['id'] , '">', $field['name'] , '</label>';
 
                     switch ( $field['type'] ) {
@@ -446,7 +447,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               var_dump($meta);
               if( is_array( $meta ) && ( ! empty( $meta ) || ! isset( $meta ) ) )
               {
-                foreach( $meta as $key=>$values )
+                foreach( $meta as $key =>$values )
                 {
                     foreach( $values as $index => $answer )
                     {
@@ -601,8 +602,8 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               }
             };
           }
-          //TODO, check if all content is <> "" and if at least one correct is marked
-          update_post_meta( $post->ID, 'answers', $_POST['answers']);
+          //TODO, check if all content is != "" and if at least one correct is marked
+          //update_post_meta( $post->ID, 'answers', $_POST['answers']);
         }
       );
 

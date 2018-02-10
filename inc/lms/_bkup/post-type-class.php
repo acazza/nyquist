@@ -188,7 +188,7 @@ class SoundlushPostType {
 	 * Notes:
 	 *   By default the list is ordered alphabetically by title.
 	 */
-   
+
 	public static function get_posts_by_meta_query( $post_type, $meta_query, $options=array() ) {
 
 		$query_args = array (

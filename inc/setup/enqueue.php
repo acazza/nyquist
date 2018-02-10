@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Soundlush Frontend Enqueue - javascript & css files
  *
@@ -11,8 +12,16 @@
 function soundlush_load_scripts()
 {
   wp_enqueue_style( 'soundlush', get_template_directory_uri() . '/css/soundlush.min.css', array(), '1.0.0', 'all' );
-  wp_enqueue_script( 'soundlush', get_template_directory_uri() . '/js/soundlush.min.js', array('jquery'), '1.0.0', true );
+  wp_enqueue_script( 'soundlush', get_template_directory_uri() . '/js/soundlush.js', array('jquery'), '1.0.0', true );
   wp_enqueue_script( 'retina', get_template_directory_uri() . '/js/retina.min.js', array(), '1.3.0', true );
+
+  global $post;
+
+  wp_localize_script( 'soundlush', 'soundlushquiz', array(
+    'ajax_url' => admin_url( 'admin-ajax.php' ),
+    'postID'   => $post->ID
+  ));
+
 }
 
 add_action( 'wp_enqueue_scripts', 'soundlush_load_scripts' );

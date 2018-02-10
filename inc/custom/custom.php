@@ -124,13 +124,14 @@ function soundlush_get_comment_navigation()
 
 function soundlush_share_post( $content )
 {
-  if( is_single() && !( is_product() ) && !( is_post_type( 'course' ) ) && !( is_post_type( 'lesson' ) ) ):
+  //if( is_single() && !( is_product() ) && !( is_post_type( 'course' ) ) && !( is_post_type( 'lesson' ) ) ):
+  if( is_single() && is_post_type( 'post' ) ):
     $content .= '<div class="share-post"><h4>Share this</h4>';
 
     $title = get_the_title();
     $permalink = get_permalink();
 
-    $twitter  = 'https://twitter.com/intent/tweet?text=Hey! Read this: ' . $title . '&amp;url=' . $permalink . '&amp;via=@acme ';
+    $twitter  = 'https://twitter.com/intent/tweet?text=Hey! Read this: ' . $title . '&amp;url=' . $permalink . '&amp;via=@soundlush ';
     $facebook = 'https://facebook.com/sharer/sharer.php?u=' . $permalink;
 
     $content .= '<ul class="share-social-media">';

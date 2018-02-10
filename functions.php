@@ -21,11 +21,12 @@ require get_template_directory() . '/inc/custom/custom.php';
 require get_template_directory() . '/inc/custom/icon-functions.php';
 require get_template_directory() . '/inc/lms/custom-helpers.php';
 require get_template_directory() . '/inc/lms/custom-post-types.php';
-require get_template_directory() . '/inc/lms/custom-radio-taxonomy.php';
+//require get_template_directory() . '/inc/lms/custom-radio-taxonomy.php';
 require get_template_directory() . '/inc/lms/custom_post_relationship.php';
-require get_template_directory() . '/inc/lms/custom_dynamic.php';
+//require get_template_directory() . '/inc/lms/custom_dynamic.php';
 require get_template_directory() . '/inc/lms/custom_post_tree.php';
 require get_template_directory() . '/inc/lms/custom_post_nav.php';
+require get_template_directory() . '/inc/lms/custom_post_quiz.php';
 require get_template_directory() . '/inc/lms/course-class.php';
 
 
