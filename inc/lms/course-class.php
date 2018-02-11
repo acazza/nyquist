@@ -18,7 +18,6 @@ if( !class_exists( 'SoundlushBook') )
       $this->add_taxonomy( 'author', 'radio' , $authors_args );
 
 
-
       // Create Custom Fields
       $this->add_custom_fields(
         array(
@@ -39,26 +38,40 @@ if( !class_exists( 'SoundlushBook') )
                 'id'        => 'amm_video_url',
                 'std'       => 'Default value here.',
                 'type'      => 'text'
-            )
-          ),
-          'context'   => 'normal',
-          'priority'  => 'default',
-          //'pages'     => 'post',
-        )
-      );
-
-
-      $this->add_custom_fields(
-        array(
-          'id'        => 'summary-meta-box',
-          'title'     => __( 'Summary' ),
-          'fields'    => array(
+            ),
             array(
-                'name'      => 'Book Summary',
-                'desc'      => 'Enter your book summary here.',
-                'id'        =>  'aam_book_summary',
-                'std'       => 'Type here.',
-                'type'      => 'editor',
+              'name'      => 'Select Video Host from list',
+              'desc'      => 'Select video host from list here.',
+              'id'        =>  'aam_video_list',
+              'std'       => 'Default value here.',
+              'type'      => 'radio',
+              'options'   => array(
+                array(
+                  'label' => 'Youtube',
+                  'value' => 'youtube'
+                ),
+                array(
+                  'label' => 'Vimeo',
+                  'value' => 'vimeo'
+                )
+              )
+            ),
+            array(
+              'name'      => 'Select Video Host from Combobox',
+              'desc'      => 'Select video host from Combobox.',
+              'id'        =>  'aam_video_cb',
+              'std'       => 'Default value here.',
+              'type'      => 'select',
+              'options'   => array(
+                array(
+                  'label' => 'Youtube',
+                  'value' => 'youtube'
+                ),
+                array(
+                  'label' => 'Vimeo',
+                  'value' => 'vimeo'
+                )
+              )
             ),
           ),
           'context'   => 'normal',
@@ -66,6 +79,26 @@ if( !class_exists( 'SoundlushBook') )
           //'pages'     => 'post',
         )
       );
+
+      //
+      // $this->add_custom_fields(
+      //   array(
+      //     'id'        => 'summary-meta-box',
+      //     'title'     => __( 'Summary' ),
+      //     'fields'    => array(
+      //       array(
+      //           'name'      => 'Book Summary',
+      //           'desc'      => 'Enter your book summary here.',
+      //           'id'        =>  'aam_book_summary',
+      //           'std'       => 'Type here.',
+      //           'type'      => 'editor',
+      //       ),
+      //     ),
+      //     'context'   => 'normal',
+      //     'priority'  => 'default',
+      //     //'pages'     => 'post',
+      //   )
+      // );
 
           //     'options' => array (
           //         'one' => array (

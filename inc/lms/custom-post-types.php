@@ -26,12 +26,12 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
     public function __construct( $name, $args = array(), $labels = array() )
     {
 
-      // Set some important variables
+      //set some important variables
       $this->post_type_name    = SoundlushHelpers::uglify( $name );
       $this->post_type_args    = $args;
       $this->post_type_labels  = $labels;
 
-      // Add action to register the post type, if the post type does not already exist
+      //add action to register the post type, if the post type does not already exist
       if( ! post_type_exists( $this->post_type_name ) )
       {
         add_action( 'init', array( &$this, 'register_post_type' ) );
@@ -39,7 +39,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
       SoundlushHelpers::activate();
 
-      // Listen for the save post hook
+      //listen for the save post hook
       $this->save();
     }
 
@@ -52,11 +52,11 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     public function register_post_type()
     {
-      //Capitilize the words and make it plural
+      //capitilize the words and make it plural
       $name       = SoundlushHelpers::beautify( $this->post_type_name );
       $plural     = SoundlushHelpers::pluralize( $name );
 
-      // We set the default labels based on the post type name and plural. We overwrite them with the given labels.
+      //we set the default labels based on the post type name and plural. We overwrite them with the given labels.
       $labels = array_merge(
         array(
             'name'                  => _x( $plural, 'post type general name' ),
@@ -86,7 +86,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
       );
 
-      // Same principle as the labels. We set some defaults and overwrite them with the given arguments.
+      //same principle as the labels. we set some defaults and overwrite them with the given arguments.
       $args = array_merge(
         array(
             'label'                 => $plural,
@@ -102,10 +102,10 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
       );
 
-      // Register the post type
+      //register the post type
       register_post_type( $this->post_type_name, $args );
 
-      // Update post type messages
+      //update post type messages
       add_filter( 'post_updated_messages', array( &$this, 'updated_messages' ) );
 
     }
@@ -130,7 +130,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       $name = SoundlushHelpers::beautify( $post_type_name );
 
       $messages[$post_type_name] = array(
-          0 => '', // Unused. Messages start at index 1.
+          0 => '', //unused. messages start at index 1.
           1 => sprintf( __( $name . ' updated. <a href="%s">View ' . $name . '</a>'), esc_url( get_permalink($post_ID) ) ),
           2 => __( $name . ' field updated.' ),
           3 => __( $name . ' field deleted.' ),
@@ -159,10 +159,10 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
       if( ! empty( $name ) )
       {
-        // We need to know the post type name, so the new taxonomy can be attached to it.
+        //get post type name, so new taxonomy can be attached to it.
         $post_type_name = $this->post_type_name;
 
-        // Taxonomy properties
+        //taxonomy properties
         $taxonomy_name      = SoundlushHelpers::uglify( $name );
         $taxonomy_labels    = $labels;
         $taxonomy_args      = $args;
@@ -171,11 +171,11 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       if( ! taxonomy_exists( $taxonomy_name ) )
       {
 
-        //Capitilize the words and make it plural
+        //capitilize the words and make it plural
         $name       = SoundlushHelpers::beautify( $name );
         $plural     = SoundlushHelpers::pluralize( $name );
 
-        // Default labels, overwrite them with the given labels.
+        //default labels, overwrite them with the given labels.
         $labels = array_merge(
           array(
               'name'                  => _x( $plural, 'taxonomy general name' ),
@@ -194,7 +194,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
           $taxonomy_labels
         );
 
-        // Default arguments, overwritten with the given arguments
+        //default arguments, overwritten with the given arguments
         $args = array_merge(
           array(
               'label'                 => $plural,
@@ -209,7 +209,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
         );
 
-        // Add the taxonomy to the post type
+        //add new taxonomy to the object type (post type)
         add_action( 'init',
           function() use( $taxonomy_name, $post_type_name, $args )
           {
@@ -219,7 +219,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       }
       else
       {
-        // The taxonomy already exists. We are going to attach the existing taxonomy to the object type (post type)
+        //taxonomy already exists. Attach the existing taxonomy to the object type (post type)
         add_action( 'init',
           function() use( $taxonomy_name, $post_type_name )
           {
@@ -228,7 +228,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         );
       }
 
-      // Generate custom metabox input type
+      //generate custom metabox input type
       if ($type != 'check' ) $this->setup_custom_metabox($taxonomy_name, $post_type_name, $type);
     }
 
@@ -241,7 +241,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     public function setup_custom_metabox($taxonomy_name, $post_type_name, $type ){
 
-      //Remove taxonomy meta box
+      //remove taxonomy meta box
       add_action( 'admin_menu',
         function() use( $taxonomy_name, $post_type_name )
         {
@@ -250,7 +250,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         }
       );
 
-      //Add custom meta box
+      //add custom meta box
       add_action( 'add_meta_boxes',
         function() use( $taxonomy_name, $post_type_name, $type )
         {
@@ -260,19 +260,19 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
             {
               global $post;
 
-              //Set up the taxonomy object and get terms
+              //set up the taxonomy object and get terms
               $taxonomy_name = $taxonomy_name;
               $tax = get_taxonomy($taxonomy_name);
               $terms = get_terms($taxonomy_name, array('hide_empty' => 0));
 
-              //Name of the form
+              //name of the form
               $name = 'tax_input[' . $taxonomy_name . ']';
 
               $postterms = get_the_terms( $post->ID, $taxonomy_name );
               $current = ($postterms ? array_pop($postterms) : false);
               $current = ($current ? $current->term_id : 0);
 
-              // Check taxonomy input type
+              //check taxonomy input type
               switch($type){
                 case 'radio': ?>
                   <!-- Display taxonomy terms -->
@@ -300,20 +300,20 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
 
     /**
-     * Attaches custom field meta boxes to the post type
-     * @param $custom_fields
+     * Attaches static custom field meta boxes to the post type
+     * @param $custom_array
      */
 
     public function add_custom_fields( $custom_array )
     {
       if( ! empty( $custom_array ) )
       {
-        // We need to know the Post Type name again
-        $post_type_name = $this->post_type_name; // book
+        //get post type name
+        $post_type_name = $this->post_type_name;
 
         global $fields;
 
-        // Meta variables
+        //meta variables
         $box_id         = SoundlushHelpers::uglify( $custom_array['id'] ); //TODO FALLBACK
         $box_title      = SoundlushHelpers::beautify( $custom_array['title'] ); //TODO FALLBACK
         $box_context    = $custom_array['context'] ? $custom_array['context'] : 'normal';
@@ -331,64 +331,69 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
             {
               global $post;
 
+              //create nonce field
               wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' );
+              //get the saved meta as an array
+              $postmeta = get_post_meta( $post->ID, 'static_fields', false );
 
-              // Check the array and loop through it
-              if( ! empty( $fields ) ) {
+              //loop through fields
+              foreach( $fields as $field )
+              {
+                //check if there is saved metadata for the field
+                $meta = isset( $postmeta[0][ $field['id'] ] ) ? $postmeta[0][ $field['id'] ] : '';
 
-                  /* Loop through $fields */
-                  foreach ( $fields as $field)
-                  { // TODO FALLBACK FOR ALL FIELDS
+                switch ( $field['type'] )
+                {
+                  case 'text':
+                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
+                    echo '<input type="text" name="static_fields[' . $field['id'] . ']" id="', $field['id'] . '" value="' . $meta  . '" />';
+                    echo '<p class="meta-desc">' . $field['desc'] . '</p>';
+                    break;
 
-                    $meta = get_post_meta( $post->ID, $field['id'], true );
+                  case 'textarea':
+                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
+                    echo '<textarea name="static_fields[' . $field['id'] . ']" id="' . $field['id'] . '" cols="60" rows="4" style="width:96%">' . $meta . '</textarea>';
+                    echo '<p class="meta-desc">' . $field['desc'] . '</p>';
+                    break;
 
-                    var_dump($meta);
+                  case 'editor':
+                    $settings = array(
+                      'wpautop'       => false,
+                      'media_buttons' => false,
+                      'textarea_name' => 'static_fields[' . $field['id'] . ']',
+                    );
+                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
+                    wp_editor( htmlspecialchars_decode( $meta ), $field['id'], $settings );
+                    break;
 
-                    echo '<label for="', $field['id'] , '">', $field['name'] , '</label>';
+                  case 'checkbox':
+                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
+                    echo '<input type="checkbox" name="static_fields[' . $field['id'] . ']" id="', $field['id'] . '"' . $meta ? ' checked="checked"' : '' . ' />';
+                    break;
 
-                    switch ( $field['type'] ) {
-
-                      case 'text':
-                        echo '<input type="text" name="', $field['id'] , '" id="', $field['id'] , '" value="', $meta , '" />';
-                        echo '<p class="meta-desc">' , $field['desc'] , '</p>';
-                        break;
-
-                      case 'textarea':
-                        echo '<textarea name="', $field['id'], '" id="', $field['id'], '" cols="60" rows="4" style="width:97%">', $meta , '</textarea>';
-                        echo '<p class="meta-desc">' , $field['desc'] , '</p>';
-                        break;
-
-                      case 'select':
-                        echo '<select name="', $field['id'], '" id="', $field['id'], '">';
-                        foreach ( $field['options'] as $option ) {
-                            echo '<option', $meta == $option ? ' selected="selected"' : '', '>', $option, '</option>';
-                        }
-                        echo '</select>';
-                        break;
-
-                      case 'radio':
-                        foreach ( $field['options'] as $option ) {
-                            echo '<input type="radio" name="', $field['id'], '" value="', $option['value'], '"', $meta == $option['value'] ? ' checked="checked"' : '', ' />', $option['name'];
-                        }
-                        break;
-
-                      case 'checkbox':
-                        echo '<input type="checkbox" name="', $field['id'], '" id="', $field['id'], '"', $meta ? ' checked="checked"' : '', ' />';
-                        break;
-
-                      case 'editor':
-                        $settings = array(
-                          'wpautop'       => false,
-                          'media_buttons' => false,
-                          'textarea_name' => $field['id'],
-                        );
-                        wp_editor( htmlspecialchars_decode( $meta ), $field['id'], $settings );
-                        break;
-
-                      default:
-                        break;
+                  case 'select':
+                    echo '<label>' . $field['name'] . ': </label>';
+                    echo '<select name="static_fields[' . $field['id'] . ']" id="' . $field['id'] . ': ">';
+                    foreach ( $field['options'] as $option ) {
+                      echo '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '') . '>' . $option['label'] . '</option>';
                     }
-                  }
+                    echo '</select>';
+                    break;
+
+                  case 'radio':
+                    echo '<ul>';
+                    echo '<label>' . $field['name'] . ': </label>';
+                    foreach ( $field['options'] as $option ) {
+                      echo '</li><label for="' . $option['value'] . '">';
+                      echo '<input type="radio" name="static_fields[' . $field['id'] . ']" id="' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '') . ' />' . $option['label'] ;
+                      echo '</label></li>';
+                    }
+                    echo '</ul>';
+                    break;
+
+                  default:
+                    break;
+                }
               }
              },
              $post_type_name,
@@ -402,21 +407,21 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
 
 
-     /**
-      * Attaches dynamic custom field meta boxes to the post type
-      * @param $custom_fields
-      */
+    /**
+     * Attaches dynamic custom field meta boxes to the post type
+     * @param $custom_array
+     */
 
     function add_dynamic_custom_fields( $custom_array )
     {
       if( ! empty( $custom_array ) )
       {
-        // We need to know the Post Type name again
-        $post_type_name = $this->post_type_name; // question
+        //get post type name
+        $post_type_name = $this->post_type_name;
 
         global $fields;
 
-        // Meta variables
+        //meta variables
         $box_id         = SoundlushHelpers::uglify( $custom_array['id'] ); //TODO FALLBACK
         $box_title      = SoundlushHelpers::beautify( $custom_array['title'] ); //TODO FALLBACK
         $box_context    = $custom_array['context'] ? $custom_array['context'] : 'normal';
@@ -440,12 +445,12 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
               //get the saved meta as an array
               $meta = get_post_meta( $post->ID, 'answers', false );
+              //$postmeta = get_post_meta( $post->ID, 'dynamic_fields', false );
 
               $c = 0;
               $output = '';
 
-              var_dump($meta);
-              if( is_array( $meta ) && ( ! empty( $meta ) || ! isset( $meta ) ) )
+              if( is_array( $meta ) && ( ! empty( $meta ) || isset( $meta ) ) )
               {
                 foreach( $meta as $key =>$values )
                 {
@@ -472,7 +477,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                             echo $field['name'] . '</label>';
 
                             $output .= '<label for="answers[banana][' . $field['id'] . ']" ><input type="checkbox" name="answers[banana][' . $field['id'] . ']"/>' . $field['name'] . '</label>';
-
                             break;
                         }
 
@@ -550,7 +554,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     public function save()
     {
-      // Need the post type name again
+      //get post type name
       $post_type_name = $this->post_type_name;
 
       add_action( 'save_post',
@@ -559,51 +563,35 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
           global $post;
 
-          // Deny the WordPress autosave function
-          if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return; //return $post->ID;
+          //deny the WordPress autosave function
+          if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
 
+          //verify nonce
+          if ( !isset($_POST['custom_post_type_nonce']) || !wp_verify_nonce( $_POST['custom_post_type_nonce'], basename(__FILE__) ) ) return;
 
-          // Verify nonce
-          if ( !isset($_POST['custom_post_type_nonce']) || !wp_verify_nonce( $_POST['custom_post_type_nonce'], basename(__FILE__) ) )
-          {
-            return;
-          }
-
-
-          // Check permissions
+          //check permissions
           if ('page' == $_POST['custom_post_type_nonce'])
           {
-            if ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  ) )
-            {
-              return;
-            }
+            if ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  ) ) return;
           }
 
-          // Save Static Custom Fields
+          //save custom fields
           if( isset( $_POST ) && isset( $post->ID ) && get_post_type( $post->ID ) == $post_type_name )
           {
             global $fields;
 
-
+            //check if there are custom fields
             if( $fields  && ! empty( $fields ) ){
 
-              // Checks for input and sanitizes/saves if needed
-              foreach ( $fields as $field )
-              {
-                if( isset( $_POST[$field['id']] ) )
-                {
-                  if( $field['type'] = 'editor' ) {
-                    $new = htmlspecialchars( $_POST[ $field['id'] ] );
-                  } else {
-                    $new = sanitize_text_field( $_POST[ $field['id'] ] );
-                  }
-                  update_post_meta( $post->ID, $field['id'],  $new );
-                }
-              }
+              // TODO Checks for input (required fields) and sanitizes/saves if needed
+              // for editor type => htmlspecialchars( $_POST[ $field['id'] ] );
+              // for text type => sanitize_text_field( $_POST[ $field['id'] ] );
+
+              update_post_meta( $post->ID, 'static_fields', $_POST['static_fields']);
+              update_post_meta( $post->ID, 'answers', $_POST['answers']);
             };
           }
-          //TODO, check if all content is != "" and if at least one correct is marked
-          //update_post_meta( $post->ID, 'answers', $_POST['answers']);
+
         }
       );
 
