@@ -16,7 +16,7 @@ if( !class_exists( 'SoundlushCustomPostNav' ) )
     public $post_type_name;
 
     /**
-    * Re-order lessons by menu_order and filters per parent
+    * Re-order post type by menu_order and filters per parent
     * for previous/next post navigation
     */
 
@@ -28,7 +28,7 @@ if( !class_exists( 'SoundlushCustomPostNav' ) )
 
       	global $post, $wpdb;
 
-        // For Custom Post Types
+        //add filter only for custom post types
         if( $this->post_type_name != 'post' )
         {
           add_filter( 'get_next_post_sort', array( &$this, 'filter_next_cpt_sort' ) );
@@ -70,7 +70,6 @@ if( !class_exists( 'SoundlushCustomPostNav' ) )
     public function filter_next_cpt_sort( $sort )
     {
       $sort = 'ORDER BY p.menu_order ASC LIMIT 1';
-
       return $sort;
     }
 
@@ -88,7 +87,6 @@ if( !class_exists( 'SoundlushCustomPostNav' ) )
     public function filter_previous_cpt_sort( $sort )
     {
       $sort = 'ORDER BY p.menu_order DESC LIMIT 1';
-
       return $sort;
     }
 

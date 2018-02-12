@@ -25,13 +25,24 @@ if( !class_exists( 'SoundlushHelpers') )
 
 
     /**
+     * Set and unifies the use of textdomain
+     */
+
+    public static function get_textdomain() {
+      return 'soundlush';
+    }
+
+
+
+    /**
      * Convert to first caps and replace undercores with spaces
      * @example $name = self::beautify( $string );
      */
 
     public static function beautify( $string )
     {
-        return ucwords( str_replace( '_', ' ', $string ) );
+        //return ucwords( str_replace( '_', ' ', $string ) );
+        return ucwords( strtolower( str_replace( '-', ' ', str_replace( '_', ' ', $string ) ) ) );
     }
 
 
@@ -43,7 +54,8 @@ if( !class_exists( 'SoundlushHelpers') )
 
     public static function uglify( $string )
     {
-        return strtolower( str_replace( ' ', '_', $string ) );
+        //return strtolower( str_replace( ' ', '_', $string ) );
+        return strtolower( str_replace( ' ', '_', str_replace( '-', '_', $string ) ) );
     }
 
 

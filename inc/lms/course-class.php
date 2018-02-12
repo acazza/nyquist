@@ -25,12 +25,25 @@ if( !class_exists( 'SoundlushBook') )
           'title'     => __( 'Video' ),
           'fields'    => array(
             array(
+                'name'      => 'Write stuff here',
+                'desc'      => 'Write your stuff.',
+                'id'        => 'aam_write_stuff',
+                'std'       => 'Default value here.',
+                'type'      => 'editor',
+            ),
+            array(
                 'name'      => 'Select Video Host',
                 'desc'      => 'Enter video host here.',
-                'id'        =>  'aam_video_select',
+                'id'        => 'aam_video_select',
                 'std'       => 'Default value here.',
                 'type'      => 'text',
-                //'options'   => array( 'Youtube', 'Vimeo', 'Self hosted' )
+            ),
+            array(
+                'name'      => 'Description',
+                'desc'      => 'Enter video description here.',
+                'id'        => 'aam_video_description',
+                'std'       => 'Default value here.',
+                'type'      => 'textarea',
             ),
             array(
                 'name'      => 'URL',
@@ -40,9 +53,16 @@ if( !class_exists( 'SoundlushBook') )
                 'type'      => 'text'
             ),
             array(
+                'name'      => 'Important',
+                'desc'      => 'Is it important?',
+                'id'        => 'amm_important',
+                'std'       => 'Default value here.',
+                'type'      => 'checkbox'
+            ),
+            array(
               'name'      => 'Select Video Host from list',
               'desc'      => 'Select video host from list here.',
-              'id'        =>  'aam_video_list',
+              'id'        => 'aam_video_list',
               'std'       => 'Default value here.',
               'type'      => 'radio',
               'options'   => array(
@@ -59,7 +79,7 @@ if( !class_exists( 'SoundlushBook') )
             array(
               'name'      => 'Select Video Host from Combobox',
               'desc'      => 'Select video host from Combobox.',
-              'id'        =>  'aam_video_cb',
+              'id'        => 'aam_video_cb',
               'std'       => 'Default value here.',
               'type'      => 'select',
               'options'   => array(
@@ -80,47 +100,7 @@ if( !class_exists( 'SoundlushBook') )
         )
       );
 
-      //
-      // $this->add_custom_fields(
-      //   array(
-      //     'id'        => 'summary-meta-box',
-      //     'title'     => __( 'Summary' ),
-      //     'fields'    => array(
-      //       array(
-      //           'name'      => 'Book Summary',
-      //           'desc'      => 'Enter your book summary here.',
-      //           'id'        =>  'aam_book_summary',
-      //           'std'       => 'Type here.',
-      //           'type'      => 'editor',
-      //       ),
-      //     ),
-      //     'context'   => 'normal',
-      //     'priority'  => 'default',
-      //     //'pages'     => 'post',
-      //   )
-      // );
-
-          //     'options' => array (
-          //         'one' => array (
-          //             'label' => 'Option One',
-          //             'value' => 'one'
-          //         ),
-          //         'two' => array (
-          //             'label' => 'Option Two',
-          //             'value' => 'two'
-          //         ),
-          //         'three' => array (
-          //             'label' => 'Option Three',
-          //             'value' => 'three'
-          //         )
-          //     )
-          // )
-
     }
-
-
-
-
   }
 }
 
@@ -142,6 +122,46 @@ $encyc_args = array(
 );
 $encyclopedia = new SoundlushCustomPostType('Encyclopedia', $encyc_args);
 
+$encyclopedia->add_dynamic_custom_fields(
+  array(
+    'id'        => 'encyclopedia_info',
+    'title'     => __( 'Enciclopedia Info' ),
+    'fields'    => array(
+      array(
+          'name'      => 'ComboBox Test',
+          'id'        => 'combotest',
+          'type'      => 'select',
+          'options'   => array(
+            array(
+              'label' => 'Combo 1',
+              'value' => 'combo1'
+            ),
+            array(
+              'label' => 'Combo 2',
+              'value' => 'combo2'
+            )
+          )
+      ),
+      array(
+          'name'      => 'RadioTest',
+          'id'        => 'radiotest',
+          'type'      => 'radio',
+          'options'   => array(
+            array(
+              'label' => 'Radio 1',
+              'value' => 'radio1'
+            ),
+            array(
+              'label' => 'Radio 2',
+              'value' => 'radio2'
+            )
+          )
+      ),
+    ),
+    'context'   => 'normal',
+    'priority'  => 'default',
+  )
+);
 
 // Create Parent-Child Relationship
 $rel = new SoundlushCustomPostRelationships( 'Encyclopedia', 'Book' );
@@ -201,7 +221,6 @@ $question->add_dynamic_custom_fields(
           'id'        => 'content',
           //'std'       => 'Default value here.',
           'type'      => 'text',
-          //'options'   => array( 'Youtube', 'Vimeo', 'Self hosted' )
       ),
       array(
           'name'      => 'Correct',

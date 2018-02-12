@@ -55,6 +55,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       //capitilize the words and make it plural
       $name       = SoundlushHelpers::beautify( $this->post_type_name );
       $plural     = SoundlushHelpers::pluralize( $name );
+      $textdomain = SoundlushHelpers::get_textdomain();
 
       //we set the default labels based on the post type name and plural. We overwrite them with the given labels.
       $labels = array_merge(
@@ -127,7 +128,8 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       $post_ID = $post->ID;
 
       $post_type_name = $this->post_type_name;
-      $name = SoundlushHelpers::beautify( $post_type_name );
+      $name           = SoundlushHelpers::beautify( $post_type_name );
+      $textdomain     = SoundlushHelpers::get_textdomain();
 
       $messages[$post_type_name] = array(
           0 => '', //unused. messages start at index 1.
@@ -174,6 +176,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         //capitilize the words and make it plural
         $name       = SoundlushHelpers::beautify( $name );
         $plural     = SoundlushHelpers::pluralize( $name );
+        $textdomain = SoundlushHelpers::get_textdomain();
 
         //default labels, overwrite them with the given labels.
         $labels = array_merge(
@@ -236,7 +239,10 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     /**
      * Generate custom metabox input type
-     * @param $type: check, radio, select
+     *
+     * @param $taxonomy_name
+     * @param $post_type_name
+     * @param $type ( radio or select )
      */
 
     public function setup_custom_metabox($taxonomy_name, $post_type_name, $type ){
@@ -290,6 +296,16 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                   </div>
                   <?php
                   break;
+
+                  case 'select': ?>
+                    <!-- Display taxonomy terms -->
+                    <div id="taxonomy-<?php echo $taxonomy_name; ?>" class="categorydiv">
+                      <div id="<?php echo $taxonomy_name; ?>-all" class="tabs-panel">
+                      <?php // TODO ?>
+                      </div>
+                    </div>
+                    <?php
+                    break;
               }
             }
             ,$post_type_name ,'side','core');
@@ -345,14 +361,14 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                 switch ( $field['type'] )
                 {
                   case 'text':
-                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
-                    echo '<input type="text" name="static_fields[' . $field['id'] . ']" id="', $field['id'] . '" value="' . $meta  . '" />';
+                    echo '<label for="static_fields_' . $field['id'] . '">' . $field['name'] . ': </label>';
+                    echo '<input type="text" name="static_fields[' . $field['id'] . ']" id="static_fields_', $field['id'] . '" value="' . $meta  . '" />';
                     echo '<p class="meta-desc">' . $field['desc'] . '</p>';
                     break;
 
                   case 'textarea':
-                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
-                    echo '<textarea name="static_fields[' . $field['id'] . ']" id="' . $field['id'] . '" cols="60" rows="4" style="width:96%">' . $meta . '</textarea>';
+                    echo '<label for="static_fields_' . $field['id'] . '">' . $field['name'] . ': </label>';
+                    echo '<textarea name="static_fields[' . $field['id'] . ']" id="static_fields_' . $field['id'] . '" cols="60" rows="4" style="width:96%">' . $meta . '</textarea>';
                     echo '<p class="meta-desc">' . $field['desc'] . '</p>';
                     break;
 
@@ -362,18 +378,21 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                       'media_buttons' => false,
                       'textarea_name' => 'static_fields[' . $field['id'] . ']',
                     );
-                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
-                    wp_editor( htmlspecialchars_decode( $meta ), $field['id'], $settings );
+                    //wp_editor id cannot have brackets
+                    $editor_id = 'static_fields_' . $field['id'];
+
+                    echo '<label for="' . $editor_id . '">' . $field['name'] . ': </label>';
+                    wp_editor( htmlspecialchars_decode( $meta ), $editor_id, $settings );
                     break;
 
                   case 'checkbox':
-                    echo '<label for="static_fields[' . $field['id'] . ']">' . $field['name'] . ': </label>';
-                    echo '<input type="checkbox" name="static_fields[' . $field['id'] . ']" id="', $field['id'] . '"' . $meta ? ' checked="checked"' : '' . ' />';
+                    echo '<input type="checkbox" name="static_fields[' . $field['id'] . ']" id="static_fields_' . $field['id'] . '"' . ( $meta ? ' checked="checked"' : '') . ' />';
+                    echo '<label for="static_fields_' . $field['id'] . '">' . $field['name'] . ' </label>';
                     break;
 
                   case 'select':
-                    echo '<label>' . $field['name'] . ': </label>';
-                    echo '<select name="static_fields[' . $field['id'] . ']" id="' . $field['id'] . ': ">';
+                    echo '<label for="static_fields_' . $field['id'] . '" >' . $field['name'] . ': </label>';
+                    echo '<select name="static_fields[' . $field['id'] . ']" id="static_fields_' . $field['id'] . '" >';
                     foreach ( $field['options'] as $option ) {
                       echo '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '') . '>' . $option['label'] . '</option>';
                     }
@@ -381,12 +400,10 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     break;
 
                   case 'radio':
-                    echo '<ul>';
-                    echo '<label>' . $field['name'] . ': </label>';
+                    echo '<ul><label>' . $field['name'] . ': </label>';
                     foreach ( $field['options'] as $option ) {
-                      echo '</li><label for="' . $option['value'] . '">';
-                      echo '<input type="radio" name="static_fields[' . $field['id'] . ']" id="' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '') . ' />' . $option['label'] ;
-                      echo '</label></li>';
+                      echo '<input type="radio" name="static_fields[' . $field['id'] . ']" id="static_fields_' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '') . ' />';
+                      echo '</li><label for="static_fields_' . $option['value'] . '">' . $option['label'] . '</label></li>';
                     }
                     echo '</ul>';
                     break;
@@ -444,42 +461,84 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               echo '<div id="meta_inner">';
 
               //get the saved meta as an array
-              $meta = get_post_meta( $post->ID, 'answers', false );
-              //$postmeta = get_post_meta( $post->ID, 'dynamic_fields', false );
+              $postmeta = get_post_meta( $post->ID, 'dynamic_fields', false );
 
               $c = 0;
               $output = '';
 
-              if( is_array( $meta ) && ( ! empty( $meta ) || isset( $meta ) ) )
+              if( is_array( $postmeta ) && ( ! empty( $postmeta ) && isset( $postmeta ) ) )
               {
-                foreach( $meta as $key =>$values )
+                foreach( $postmeta as $key =>$values )
                 {
                     foreach( $values as $index => $answer )
                     {
-                      var_dump($answer);
                       echo '<div class="repeater">';
 
                       $output = '';
 
                       foreach( $fields as $field )
                       {
-                        switch ( $field['type'] ) {
+                        switch ( $field['type'] )
+                        {
                           case 'text':
-                            echo '<label for="answers[' . $c . '][' . $field['id'] . ']" >' . $field['name'] . ': </label>';
-                            echo '<input type="text" name="answers[' . $c . '][' . $field['id'] . ']" value="' . $answer[ $field['id'] ] . '" />';
+                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . ': </label>';
+                            echo '<input type="text" name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" value="' . $answer[ $field['id'] ] . '" />';
 
-                            $output .= '<label for="answers[banana][' . $field['id'] . ']" >' . $field['name'] . ': </label><input type="text" name="answers[banana][' . $field['id'] . ']"/>';
+                            $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label><input type="text" name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '"/>';
                             break;
+
+                          case 'textarea':
+                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . ': </label>';
+                            echo '<textarea name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" cols="30" rows="4" style="width:50%" >' . $answer[ $field['id'] ] . '</textarea>';
+                            //echo '<p class="meta-desc">' . $field['desc'] . '</p>';
+
+                            $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label><textarea name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" cols="30" rows="4" style="width:50%" ></textarea>'; //<p class="meta-desc">' . $field['desc'] . '</p>
+                            break;
+
 
                           case 'checkbox':
-                            echo '<label for="answers[' . $c . '][' . $field['id'] . ']" >';
-                            echo '<input type="checkbox" name="answers[' . $c . '][' . $field['id'] . ']" ' . (isset($answer[ $field['id'] ]) ? "checked" : '') . '/>';
-                            echo $field['name'] . '</label>';
+                            echo '<input type="checkbox" name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" ' . (isset($answer[ $field['id'] ]) ? "checked" : '') . '/>';
+                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . '</label>';
 
-                            $output .= '<label for="answers[banana][' . $field['id'] . ']" ><input type="checkbox" name="answers[banana][' . $field['id'] . ']"/>' . $field['name'] . '</label>';
+                            $output .= '<input type="checkbox" name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '"/><label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . '</label>';
+                            break;
+
+                          case 'select':
+                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . ': </label>';
+                            echo '<select name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" >';
+                            foreach ( $field['options'] as $option ) {
+                              echo '<option value="' . $option['value'] . '" ' . ( $answer[ $field['id'] ] == $option['value'] ? '" selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
+                            }
+                            echo '</select>';
+
+                            $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label>';
+                            $output .= '<select name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" >';
+                            foreach ( $field['options'] as $option ) {
+                              $output .= '<option value="' . $option['value'] . '">' . $option['label'] . '</option>';
+                            }
+                            $output .='</select>';
+                            break;
+
+                          case 'radio':
+                            echo '<ul><label>' . $field['name'] . ': </label>';
+                            foreach ( $field['options'] as $option ) {
+                              echo '<input type="radio" name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $option['value'] . '" value="' . $option['value'] . '"';
+                              echo ( $answer[ $field['id'] ] == $option['value'] ? 'checked="checked"' : '') . ' />';
+                              echo '</li><label for="dynamic_fields_' . $c . '_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+                            }
+                            echo '</ul>';
+
+                            $output .= '<ul><label>' . $field['name'] . ': </label>';
+                            foreach ( $field['options'] as $option ) {
+                              $output .= '<input type="radio" name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $option['value'] . '" value="' . $option['value'] . '" />';
+                              $output .= '</li><label for="dynamic_fields_count_variable_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+                            }
+                            $output .= '</ul>';
+                            break;
+
+                          default:
                             break;
                         }
-
                       }
                       $c = $c +1;
                       echo '<button class="remove">' .  __( 'Remove Item' ) .  '</button>';
@@ -487,17 +546,40 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     }
                   }
                 } else {
-
                   foreach( $fields as $field )
                   {
-                    switch ( $field['type'] ) {
+                    switch ( $field['type'] )
+                    {
                       case 'text':
-                        $output .= '<label for="answers[banana][' . $field['id'] . ']" >' . $field['name'] . ': </label><input type="text" name="answers[banana][' . $field['id'] . ']"/>';
+                        $output .= '<label for="dynamic_fields[count_variable][' . $field['id'] . ']" >' . $field['name'] . ': </label><input type="text" name="dynamic_fields[count_variable][' . $field['id'] . ']"/>';
+                        break;
+
+                      case 'textarea':
+                        $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label><textarea name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" cols="30" rows="4" style="width:50%" ></textarea>'; //<p class="meta-desc">' . $field['desc'] . '</p>
                         break;
 
                       case 'checkbox':
-                        $output .= '<label for="answers[banana][' . $field['id'] . ']" ><input type="checkbox" name="answers[banana][' . $field['id'] . ']"/>' . $field['name'] . '</label>';
+                        $output .= '<label for="dynamic_fields[count_variable][' . $field['id'] . ']" ><input type="checkbox" name="dynamic_fields[count_variable][' . $field['id'] . ']"/>' . $field['name'] . '</label>';
                         break;
+
+                      case 'select':
+                        $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label>';
+                        $output .= '<select name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" >';
+                        foreach ( $field['options'] as $option ) {
+                          $output .= '<option value="' . $option['value'] . '">' . $option['label'] . '</option>';
+                        }
+                        $output .='</select>';
+                        break;
+
+                      case 'radio':
+                        $output .= '<ul><label>' . $field['name'] . ': </label>';
+                        foreach ( $field['options'] as $option ) {
+                          $output .= '</li><label for="static_fields_count_variable_' . $option['value'] . '">';
+                          $output .= '<input type="radio" name="static_fields[count_variable][' . $field['id'] . ']" id="static_fields_count_variable_' . $option['value'] . '" value="' . $option['value'] . '" />' . $option['label'] . '</label></li>';
+                        }
+                        $output .= '</ul>';
+                        break;
+
                     }
                   }
 
@@ -518,7 +600,8 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     $( ".add" ).click( function()
                     {
                         count = count + 1;
-                        var res = output.replace(/banana/g, count);
+                        //substitute placeholder index by the count variable
+                        var res = output.replace(/count_variable/g, count);
 
                         $('#here').append('<div>'+ res +'<button class="remove">Remove Answer</button></div>' );
 
@@ -549,7 +632,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     /**
      * Listens for when the post type is being saved
-     * @param
+     *
      */
 
     public function save()
@@ -588,7 +671,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               // for text type => sanitize_text_field( $_POST[ $field['id'] ] );
 
               update_post_meta( $post->ID, 'static_fields', $_POST['static_fields']);
-              update_post_meta( $post->ID, 'answers', $_POST['answers']);
+              update_post_meta( $post->ID, 'dynamic_fields', $_POST['dynamic_fields']);
             };
           }
 

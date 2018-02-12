@@ -22,7 +22,7 @@ if( !class_exists( 'SoundlushCustomPostQuiz') )
 
     static function has_taken_quiz($post_id)
     {
-      // check if there is usermeta for that quiz
+      //check if there is saved usermeta for that quiz
       if( is_user_logged_in() )
       {
         $user = wp_get_current_user();
@@ -30,7 +30,7 @@ if( !class_exists( 'SoundlushCustomPostQuiz') )
 
         $usermeta = get_user_meta( $user_id, 'user_quiz', false );
 
-        // verify if user has saved data for this quiz id
+        //verify if user has saved data for this quiz id
         foreach( $usermeta as $meta ){
           if( isset( $meta[$post_id] ) ) {
             return true;
@@ -88,12 +88,12 @@ if( !class_exists( 'SoundlushCustomPostQuiz') )
     {
       $count = 0;
 
-      // Loop through all questions
+      //loop through all questions
 
       $questions = array(203, 229);
 
       foreach( $questions as $question_id ) {
-        $postmeta = get_post_meta( $question_id, 'answers', false );
+        $postmeta = get_post_meta( $question_id, 'dynamic_fields', false );
 
         $count++;
         echo $count .'. ' . get_the_title($question_id);
@@ -168,7 +168,7 @@ if( !class_exists( 'SoundlushCustomPostQuiz') )
 
         while ($children->have_posts()) : $children->the_post();
 
-          // save all questions generated for this quiz by ID
+          //save all questions generated for this quiz by ID
           array_push( static::$questions, $children->post->ID );
 
           get_template_part( 'template-parts/single-question', get_post_format() );
@@ -192,7 +192,7 @@ if( !class_exists( 'SoundlushCustomPostQuiz') )
 
     static function setup_questions( $question_id ){
 
-      $postmeta = get_post_meta( $question_id, 'answers', false );
+      $postmeta = get_post_meta( $question_id, 'dynamic_fields', false );
       $quiz_id = wp_get_post_parent_id( $question_id );
 
       echo '<ul>';
@@ -246,7 +246,7 @@ if( !class_exists( 'SoundlushCustomPostQuiz') )
               $grade = 0;
             }
 
-            // add question points
+            //add question points
 
             $user_quiz[$quiz_id][$value] = array(
                 'user_answer' => $user_answer,
@@ -266,7 +266,7 @@ if( !class_exists( 'SoundlushCustomPostQuiz') )
 
     static function grade_quiz( $value ) {
 
-      $postmeta = get_post_meta( $value, 'answers', true );
+      $postmeta = get_post_meta( $value, 'dynamic_fields', true );
       $correct = '';
 
       if( isset( $postmeta ) ) {
