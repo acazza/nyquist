@@ -28,8 +28,9 @@ if( !class_exists( 'SoundlushBook') )
                 'name'      => 'Write stuff here',
                 'desc'      => 'Write your stuff.',
                 'id'        => 'aam_write_stuff',
-                'std'       => 'Default value here.',
+                'std'       => 'Default value here.', //default or placeholder ???
                 'type'      => 'editor',
+                'required'  => true
             ),
             array(
                 'name'      => 'Select Video Host',
@@ -37,6 +38,7 @@ if( !class_exists( 'SoundlushBook') )
                 'id'        => 'aam_video_select',
                 'std'       => 'Default value here.',
                 'type'      => 'text',
+                'required'  => true
             ),
             array(
                 'name'      => 'Description',
@@ -44,20 +46,23 @@ if( !class_exists( 'SoundlushBook') )
                 'id'        => 'aam_video_description',
                 'std'       => 'Default value here.',
                 'type'      => 'textarea',
+                'required'  => true
             ),
             array(
                 'name'      => 'URL',
                 'desc'      => 'Enter video url here.',
                 'id'        => 'amm_video_url',
                 'std'       => 'Default value here.',
-                'type'      => 'text'
+                'type'      => 'text',
+                'required'  => true
             ),
             array(
                 'name'      => 'Important',
                 'desc'      => 'Is it important?',
                 'id'        => 'amm_important',
                 'std'       => 'Default value here.',
-                'type'      => 'checkbox'
+                'type'      => 'checkbox',
+                'required'  => false
             ),
             array(
               'name'      => 'Select Video Host from list',
@@ -65,6 +70,7 @@ if( !class_exists( 'SoundlushBook') )
               'id'        => 'aam_video_list',
               'std'       => 'Default value here.',
               'type'      => 'radio',
+              'required'  => true,
               'options'   => array(
                 array(
                   'label' => 'Youtube',
@@ -82,6 +88,7 @@ if( !class_exists( 'SoundlushBook') )
               'id'        => 'aam_video_cb',
               'std'       => 'Default value here.',
               'type'      => 'select',
+              'required'  => true,
               'options'   => array(
                 array(
                   'label' => 'Youtube',
@@ -187,7 +194,11 @@ $quiz->add_custom_fields(
           'name'      => 'Number of question',
           'desc'      => 'Enter the number of questions in your quiz.',
           'id'        => 'num_questions',
-          'type'      => 'text',
+          'std'       => 10,
+          'type'      => 'number',
+          'min'       => 5,
+          'max'       => 15,
+          'step'      => 1
       )
     ),
     'context'   => 'normal',

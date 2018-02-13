@@ -278,10 +278,9 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               $current = ($postterms ? array_pop($postterms) : false);
               $current = ($current ? $current->term_id : 0);
 
-              //check taxonomy input type
-              switch($type){
+              //check taxonomy input type and display taxonomy terms
+              switch( $type ){
                 case 'radio': ?>
-                  <!-- Display taxonomy terms -->
                   <div id="taxonomy-<?php echo $taxonomy_name; ?>" class="categorydiv">
                     <div id="<?php echo $taxonomy_name; ?>-all" class="tabs-panel">
                       <ul id="<?php echo $taxonomy_name; ?>checklist" class="list:<?php echo $taxonomy_name?> categorychecklist form-no-clear">
@@ -352,66 +351,86 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               //get the saved meta as an array
               $postmeta = get_post_meta( $post->ID, 'static_fields', false );
 
+              echo '<table class="form-table">';
+
               //loop through fields
               foreach( $fields as $field )
               {
-                //check if there is saved metadata for the field
-                $meta = isset( $postmeta[0][ $field['id'] ] ) ? $postmeta[0][ $field['id'] ] : '';
+                $html        = '';
+                $id          = SoundlushHelpers::uglify( $field['id'] );
+                $name        = SoundlushHelpers::beautify( $field['name'] );
+                $type        = isset( $field['type'] ) ? $field['type'] : 'text'; //default = text
+                $required    = ( isset( $field['required'] ) && $field['required'] ) ? ' required' : ''; //default: false
+                $description = isset( $field['desc'] ) ? '<span class="description">' . $field['desc'] . '</span>' : ''; //Optional
+                $standard    = isset( $field['std'] ) ? $field['std'] : ''; //Optional
 
-                switch ( $field['type'] )
+                //check if there is saved metadata for the field, if not use default value
+                $meta        = isset( $postmeta[0][ $field['id'] ] ) ? $postmeta[0][ $field['id'] ] : $standard ;
+
+                switch ( $type )
                 {
                   case 'text':
-                    echo '<label for="static_fields_' . $field['id'] . '">' . $field['name'] . ': </label>';
-                    echo '<input type="text" name="static_fields[' . $field['id'] . ']" id="static_fields_', $field['id'] . '" value="' . $meta  . '" />';
-                    echo '<p class="meta-desc">' . $field['desc'] . '</p>';
+                    $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
+                    break;
+
+                  case 'number':
+                    $min  = isset( $field['min'] ) ? ' min="' . $field['min'] . '" ' : '';
+                    $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
+                    $step = isset( $field['step'] ) ? ' step="'. $field['step'] . '" ' : '';
+
+                    $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="number" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
                     break;
 
                   case 'textarea':
-                    echo '<label for="static_fields_' . $field['id'] . '">' . $field['name'] . ': </label>';
-                    echo '<textarea name="static_fields[' . $field['id'] . ']" id="static_fields_' . $field['id'] . '" cols="60" rows="4" style="width:96%">' . $meta . '</textarea>';
-                    echo '<p class="meta-desc">' . $field['desc'] . '</p>';
+                    $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
                     break;
 
                   case 'editor':
                     $settings = array(
                       'wpautop'       => false,
                       'media_buttons' => false,
-                      'textarea_name' => 'static_fields[' . $field['id'] . ']',
+                      'textarea_name' => 'static_fields[' . $id . ']',
                     );
-                    //wp_editor id cannot have brackets
-                    $editor_id = 'static_fields_' . $field['id'];
+                    $editor_id = 'static_fields_' . $id;
 
-                    echo '<label for="' . $editor_id . '">' . $field['name'] . ': </label>';
+                    //create buffer & echo the editor to the buffer
+                    ob_start();
                     wp_editor( htmlspecialchars_decode( $meta ), $editor_id, $settings );
+
+                    $html = '<tr><th scope="row"><label for="' . $editor_id . '">' . $name . ': </label></th><td>';
+
+                    //store the contents of the buffer in the variable
+                    $html .= ob_get_clean();
+                    $html .= $description .'</td></tr>';
                     break;
 
                   case 'checkbox':
-                    echo '<input type="checkbox" name="static_fields[' . $field['id'] . ']" id="static_fields_' . $field['id'] . '"' . ( $meta ? ' checked="checked"' : '') . ' />';
-                    echo '<label for="static_fields_' . $field['id'] . '">' . $field['name'] . ' </label>';
+                    //WHat to write here!!! fieldset ???
+                    $html = '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="static_fields[' . $id . ']" id="static_fields_' . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="static_fields_' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
                     break;
 
                   case 'select':
-                    echo '<label for="static_fields_' . $field['id'] . '" >' . $field['name'] . ': </label>';
-                    echo '<select name="static_fields[' . $field['id'] . ']" id="static_fields_' . $field['id'] . '" >';
+                    $html = '<tr><th scope="row"><label for="static_fields_' . $id . '" >' . $name . ': </label></th><td><select name="static_fields[' . $id . ']" id="static_fields_' . $id . '" >';
                     foreach ( $field['options'] as $option ) {
-                      echo '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '') . '>' . $option['label'] . '</option>';
+                      $html .= '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
                     }
-                    echo '</select>';
+                    $html .= '</select></br>' . $description . '</td></tr>';
                     break;
 
                   case 'radio':
-                    echo '<ul><label>' . $field['name'] . ': </label>';
+                    $html = '<tr><th scope="row"><label>' . $name . ': </label></th><td><ul>';
                     foreach ( $field['options'] as $option ) {
-                      echo '<input type="radio" name="static_fields[' . $field['id'] . ']" id="static_fields_' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '') . ' />';
-                      echo '</li><label for="static_fields_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+                      $html .= '<li><input type="radio" name="static_fields[' . $id . ']" id="static_fields_' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="static_fields_' . $option['value'] . '">' . $option['label'] . '</label></li>';
                     }
-                    echo '</ul>';
+                    $html .= '</ul>' . $description . '</td></tr>';
                     break;
 
                   default:
                     break;
                 }
+                echo $html;
               }
+              echo '</table>';
              },
              $post_type_name,
              $box_context,
@@ -466,6 +485,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               $c = 0;
               $output = '';
 
+              //if there is saved postdata for the post
               if( is_array( $postmeta ) && ( ! empty( $postmeta ) && isset( $postmeta ) ) )
               {
                 foreach( $postmeta as $key =>$values )
@@ -541,11 +561,12 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                         }
                       }
                       $c = $c +1;
-                      echo '<button class="remove">' .  __( 'Remove Item' ) .  '</button>';
+                      echo '<button class="remove button-secondary">' .  __( 'Remove Item' ) .  '</button>';
                       echo '</div>';
                     }
                   }
                 } else {
+                  //if there is NO saved postdata for the post
                   foreach( $fields as $field )
                   {
                     switch ( $field['type'] )
@@ -588,7 +609,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
               ?>
               <span id="here"></span>
-              <button class="add"><?php _e( 'Add Item' ); ?></button>
+              <button class="add button-primary"><?php _e( 'Add Item' ); ?></button>
 
               <script>
                   var $ =jQuery.noConflict();
@@ -603,7 +624,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                         //substitute placeholder index by the count variable
                         var res = output.replace(/count_variable/g, count);
 
-                        $('#here').append('<div>'+ res +'<button class="remove">Remove Answer</button></div>' );
+                        $('#here').append('<div>'+ res +'<button class="remove button-secondary">Remove Answer</button></div>' );
 
                         return false;
                     //}
@@ -646,7 +667,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
           global $post;
 
-          //deny the WordPress autosave function
+          //deny WordPress autosave function
           if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
 
           //verify nonce
