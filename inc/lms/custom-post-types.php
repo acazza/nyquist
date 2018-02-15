@@ -12,11 +12,27 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
   class SoundlushCustomPostType
   {
 
+  /**
+   * Public vars
+   *
+   * @var string  $post_type_name           Holds the name of the post type.
+   * @var array   $post_type_args
+   * @var array   $post_type_labels
+   * @var string  $taxonomy_name;
+   * @var array   $columns                  Columns visible in admin edit screen.
+   * @var array   $custom_populate_columns  User functions to populate columns.
+   * @var array   $sortable                 Define which columns are sortable on the admin edit screen.
+   * @var string  $textdomain               Used for internationalising.
+   */
+
     public $post_type_name;
     public $post_type_args;
     public $post_type_labels;
     public $taxonomy_name;
-
+    public $columns;
+    public $custom_populate_columns;
+    public $sortable;
+    public $textdomain = 'soundlush';
 
     /**
      * Class constructor
@@ -44,9 +60,47 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
     }
 
 
+    /**
+     * Add Action
+     * Helper function to add add_action WordPress filters.
+     *
+     * @param string    $action          Name of the action.
+     * @param string    $function        Function to hook that will run on action.
+     * @param integer   $priority        Order in which to execute the function, relation to other functions hooked to this action.
+     * @param integer   $accepted_args   The number of arguments the function accepts.
+     */
+
+    function add_action( $action, $function, $priority = 10, $accepted_args = 1 )
+    {
+        //pass variables into WordPress add_action function
+        add_action( $action, $function, $priority, $accepted_args );
+    }
+
 
     /**
-     * Method which registers the post type
+     * Add Filter
+     * Create add_filter WordPress filter.
+     *
+     * @see http://codex.wordpress.org/Function_Reference/add_filter
+     *
+     * @param  string  $action           Name of the action to hook to, e.g 'init'.
+     * @param  string  $function         Function to hook that will run on @action.
+     * @param  int     $priority         Order in which to execute the function, relation to other function hooked to this action.
+     * @param  int     $accepted_args    The number of arguements the function accepts.
+     */
+
+    function add_filter( $action, $function, $priority = 10, $accepted_args = 1 )
+    {
+        //pass variables into Wordpress add_action function
+        add_filter( $action, $function, $priority, $accepted_args );
+    }
+
+
+
+    /**
+     * Register Post Type
+     * Registers a new post type
+     *
      * @param
      */
 
@@ -100,15 +154,14 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         ),
 
         $this->post_type_args
-
       );
 
       //register the post type
       register_post_type( $this->post_type_name, $args );
 
-      //update post type messages
+      //rewrite post type update messages
       add_filter( 'post_updated_messages', array( &$this, 'updated_messages' ) );
-
+      add_filter( 'bulk_post_updated_messages', array( &$this, 'bulk_updated_messages' ), 10, 2 );
     }
 
 
@@ -116,9 +169,10 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
     /**
      * Callback for WordPress 'post_updated_messages' filter.
+     * Internal function that modifies the post type names in updated messages
      *
-     * @param  array $messages The array of messages.
-     * @return array $messages The array of messages.
+     * @param  array $messages an array of updated messages.
+     * @return array $messages an array of updated messages.
      */
 
     public function updated_messages( $messages ){
@@ -150,10 +204,42 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
 
 
+    /**
+     * Callback for WordPress 'bulk_updated_messages' filter
+     * Internal function that modifies the post type names in bulk updated messages
+     *
+     * @param array $bulk_messages an array of bulk updated messages
+     */
+
+    function bulk_updated_messages( $bulk_messages, $bulk_counts ) {
+
+      $post_type_name = $this->post_type_name;
+      $name           = SoundlushHelpers::beautify( $post_type_name );
+      $plural         = SoundlushHelpers::pluralize( $name );
+      $textdomain     = SoundlushHelpers::get_textdomain();
+
+      $bulk_messages[ $post_type_name ] = array(
+          'updated'   => _n( '%s ' . $name . ' updated.', '%s ' . $plural . ' updated.', $bulk_counts['updated'] ),
+          'locked'    => _n( '%s ' . $name . ' not updated, somebody is editing it.', '%s ' . $plural . ' not updated, somebody is editing them.', $bulk_counts['locked'] ),
+          'deleted'   => _n( '%s ' . $name . ' permanently deleted.', '%s ' . $plural . ' permanently deleted.', $bulk_counts['deleted'] ),
+          'trashed'   => _n( '%s ' . $name . ' moved to the Trash.', '%s ' . $plural . ' moved to the Trash.', $bulk_counts['trashed'] ),
+          'untrashed' => _n( '%s ' . $name . ' restored from the Trash.', '%s ' . $plural . ' restored from the Trash.', $bulk_counts['untrashed'] ),
+      );
+
+      return $bulk_messages;
+
+    }
+
+
 
     /**
-     * Method to attach the taxonomy to the post type
-     * @param $type: check, radio, select
+     * Add taxonomy
+     * Attach the taxonomy to the post type
+     *
+     * @param string $name    Taxonomy name
+     * @param string $type    Accepts: check, radio or select (default: 'check')
+     * @param array  $args
+     * @param array  $labels
      */
 
     public function add_taxonomy( $name, $type = 'check', $args = array(), $labels = array() )
@@ -172,7 +258,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
       if( ! taxonomy_exists( $taxonomy_name ) )
       {
-
         //capitilize the words and make it plural
         $name       = SoundlushHelpers::beautify( $name );
         $plural     = SoundlushHelpers::pluralize( $name );
@@ -193,7 +278,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               'new_item_name'         => __( 'New ' . $name . ' Name' ),
               'menu_name'             => __( $name ),
           ),
-
           $taxonomy_labels
         );
 
@@ -207,7 +291,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               'show_in_nav_menus'     => true,
               '_builtin'              => false,
           ),
-
           $taxonomy_args
 
         );
@@ -220,9 +303,10 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
           }
         );
       }
+      //taxonomy already exists
       else
       {
-        //taxonomy already exists. Attach the existing taxonomy to the object type (post type)
+        //attach the existing taxonomy to the object type (post type)
         add_action( 'init',
           function() use( $taxonomy_name, $post_type_name )
           {
@@ -231,13 +315,14 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         );
       }
 
-      //generate custom metabox input type
+      //generate custom metabox based on input type
       if ($type != 'check' ) $this->setup_custom_metabox($taxonomy_name, $post_type_name, $type);
     }
 
 
 
     /**
+     * Setup Custom Metabox
      * Generate custom metabox input type
      *
      * @param $taxonomy_name
@@ -279,17 +364,20 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
               $current = ($current ? $current->term_id : 0);
 
               //check taxonomy input type and display taxonomy terms
-              switch( $type ){
+              switch( $type )
+              {
                 case 'radio': ?>
                   <div id="taxonomy-<?php echo $taxonomy_name; ?>" class="categorydiv">
                     <div id="<?php echo $taxonomy_name; ?>-all" class="tabs-panel">
                       <ul id="<?php echo $taxonomy_name; ?>checklist" class="list:<?php echo $taxonomy_name?> categorychecklist form-no-clear">
-                        <?php   foreach($terms as $term){
+                        <?php   foreach($terms as $term)
+                        {
                             $id = $taxonomy_name.'-'.$term->term_id;
                             echo "<li id='$id'><label class='selectit'>";
                             echo "<input type='radio' id='in-$id' name='{$name}'".checked($current,$term->term_id,false)."value='$term->term_id' />$term->name<br />";
                             echo "</label></li>";
-                        }?>
+                        }
+                        ?>
                       </ul>
                     </div>
                   </div>
@@ -315,7 +403,342 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
 
     /**
-     * Attaches static custom field meta boxes to the post type
+     * Add admin columns
+     * Adds columns to the admin edit screen. Function is used with add_action
+     *
+     * @param array     $columns      Columns to be added to the admin edit screen.
+     * @return array    $columns
+     */
+
+    function add_admin_columns( $columns ) {
+
+        // If no user columns have been specified, add taxonomies
+        if ( ! isset( $this->columns ) )
+        {
+            $new_columns = array();
+
+            // determine which column to add custom taxonomies after
+            if ( is_array( $this->taxonomies ) && in_array( 'post_tag', $this->taxonomies ) || $this->post_type_name === 'post' ) {
+                $after = 'tags';
+            } elseif( is_array( $this->taxonomies ) && in_array( 'category', $this->taxonomies ) || $this->post_type_name === 'post' )
+            {
+                $after = 'categories';
+            } elseif( post_type_supports( $this->post_type_name, 'author' ) )
+            {
+                $after = 'author';
+            } else
+            {
+                $after = 'title';
+            }
+
+            // foreach exisiting columns
+            foreach( $columns as $key => $title )
+            {
+                // add exisiting column to the new column array
+                $new_columns[$key] = $title;
+
+                // we want to add taxonomy columns after a specific column
+                if( $key === $after ) {
+
+                    // If there are taxonomies registered to the post type.
+                    if ( is_array( $this->taxonomies ) ) {
+
+                        // Create a column for each taxonomy.
+                        foreach( $this->taxonomies as $tax ) {
+
+                            // WordPress adds Categories and Tags automatically, ignore these
+                            if( $tax !== 'category' && $tax !== 'post_tag' ) {
+
+                                // Get the taxonomy object for labels.
+                                $taxonomy_object = get_taxonomy( $tax );
+
+                                // Column key is the slug, value is friendly name.
+                                $new_columns[ $tax ] = sprintf( __( '%s', $this->textdomain ), $taxonomy_object->labels->name );
+                            }
+                        }
+                    }
+                }
+            }
+
+            // overide with new columns
+            $columns = $new_columns;
+
+        } else
+        {
+            // Use user submitted columns, these are defined using the object columns() method.
+            $columns = $this->columns;
+        }
+
+        return $columns;
+    }
+
+
+    /**
+     * Populate admin columns
+     * Populate custom columns on the admin edit screen.
+     *
+     * @param string  $column     The name of the column.
+     * @param integer $post_id    The post ID.
+     */
+
+    function populate_admin_columns( $column, $post_id )
+    {
+        //get wordpress $post object.
+        global $post;
+
+        //determine the column
+        switch( $column ) {
+
+            //if column is a taxonomy associated with the post type.
+            case ( taxonomy_exists( $column ) ) :
+
+                //get the taxonomy for the post
+                $terms = get_the_terms( $post_id, $column );
+
+                //if we have terms.
+                if ( ! empty( $terms ) )
+                {
+                    $output = array();
+
+                    //loop through each term, linking to the 'edit posts' page for the specific term.
+                    foreach( $terms as $term )
+                    {
+                        //output is an array of terms associated with the post.
+                        $output[] = sprintf(
+                            //define link.
+                            '<a href="%s">%s</a>',
+                            //create filter url.
+                            esc_url( add_query_arg( array( 'post_type' => $post->post_type, $column => $term->slug ), 'edit.php' ) ),
+                            //create friendly term name.
+                            esc_html( sanitize_term_field( 'name', $term->name, $term->term_id, $column, 'display' ) )
+                        );
+                    }
+                    //join the terms, separating them with a comma.
+                    echo join( ', ', $output );
+
+                //if no terms found.
+                } else
+                {
+                    //get the taxonomy object for labels
+                    $taxonomy_object = get_taxonomy( $column );
+                    //echo no terms.
+                    printf( __( 'No %s', $this->textdomain ), $taxonomy_object->labels->name );
+                }
+                break;
+
+            //if column is for the post ID.
+            case 'post_id' :
+
+                echo $post->ID;
+                break;
+
+            //if the column is prepended with 'meta_', this will automatically retrieve the meta values and display them.
+            case ( preg_match( '/^meta_/', $column ) ? true : false ) :
+
+                //meta_book_author (meta key = book_author)
+                $x = substr( $column, 5 );
+                $meta = get_post_meta( $post->ID, $x );
+                echo join( ", ", $meta );
+                break;
+
+            //if the column is post thumbnail.
+            case 'icon' :
+
+                //create the edit link.
+                $link = esc_url( add_query_arg( array( 'post' => $post->ID, 'action' => 'edit' ), 'post.php' ) );
+
+                //if it post has a featured image.
+                if ( has_post_thumbnail() )
+                {
+                    //display post featured image with edit link.
+                    echo '<a href="' . $link . '">';
+                        the_post_thumbnail( array(60, 60) );
+                    echo '</a>';
+                } else
+                {
+                    //display default media image with link.
+                    echo '<a href="' . $link . '"><img src="'. site_url( '/wp-includes/images/crystal/default.png' ) .'" alt="' . $post->post_title . '" /></a>';
+                }
+                break;
+
+            //default case checks if the column has a user function, this is most commonly used for custom fields.
+            default :
+
+                //if there are user custom columns to populate.
+                if ( isset( $this->custom_populate_columns ) && is_array( $this->custom_populate_columns ) )
+                {
+                    //if this column has a user submitted function to run.
+                    if ( isset( $this->custom_populate_columns[ $column ] ) && is_callable( $this->custom_populate_columns[ $column ] ) )
+                    {
+                        //run the function.
+                        call_user_func_array(  $this->custom_populate_columns[ $column ], array( $column, $post ) );
+                    }
+                }
+                break;
+        }
+    }
+
+
+
+    /**
+     * Columns
+     * Choose columns to be displayed on the admin edit screen.
+     *
+     * @param array   $columns    An array of columns to be displayed.
+     */
+
+    function columns( $columns ) {
+
+        //if columns is set.
+        if( isset( $columns ) )
+        {
+            //assign user submitted columns to object.
+            $this->columns = $columns;
+        }
+    }
+
+
+
+    /**
+     * Populate columns
+     * Define what and how to populate a specific admin column.
+     *
+     * @param string  $column_name    The name of the column to populate.
+     * @param mixed   $callback       An anonyous function or callable array to call when populating the column.
+     */
+
+    function populate_column( $column_name, $callback )
+    {
+        $this->custom_populate_columns[ $column_name ] = $callback;
+    }
+
+
+
+    /**
+     * Sortable
+     * Define what columns are sortable in the admin edit screen.
+     *
+     * @param array   $columns        An array of columns that are sortable.
+     */
+
+    function sortable( $columns = array() )
+    {
+        //assign user defined sortable columns to object variable.
+        $this->sortable = $columns;
+
+        //run filter to make columns sortable.
+        $this->add_filter( 'manage_edit-' . $this->post_type_name . '_sortable_columns', array( &$this, 'make_columns_sortable' ) );
+
+        //run action that sorts columns on request.
+        $this->add_action( 'load-edit.php', array( &$this, 'load_edit' ) );
+    }
+
+
+
+    /**
+     * Make columns sortable
+     * Internal function that adds user defined sortable columns to WordPress default columns.
+     *
+     * @param array $columns Columns to be sortable.
+     */
+
+    function make_columns_sortable( $columns )
+    {
+        //for each sortable column.
+        foreach ( $this->sortable as $column => $values ) {
+            //make an array to merge into wordpress sortable columns.
+            $sortable_columns[ $column ] = $values[0];
+        }
+
+        //merge sortable columns array into wordpress sortable columns.
+        $columns = array_merge( $sortable_columns, $columns );
+
+        return $columns;
+    }
+
+
+
+    /**
+     * Load edit
+     * Sort columns only on the edit.php page when requested.
+     * @see http://codex.wordpress.org/Plugin_API/Filter_Reference/request
+     */
+
+    function load_edit()
+    {
+        //run filter to sort columns when requested
+        $this->add_filter( 'request', array( &$this, 'sort_columns' ) );
+    }
+
+
+
+    /**
+     * Sort columns
+     * Internal function that sorts columns on request.
+     * @see load_edit()
+     *
+     * @param array     $vars     The query vars submitted by user.
+     * @return array    $vars     A sorted array.
+     */
+
+    function sort_columns( $vars )
+    {
+
+        //cycle through all sortable columns submitted by the user
+        foreach ( $this->sortable as $column => $values ) {
+
+            //retrieve the meta key from the user submitted array of sortable columns
+            $meta_key = $values[0];
+
+            //if the meta_key is a taxonomy
+            if( taxonomy_exists( $meta_key ) )
+            {
+                //sort by taxonomy.
+                $key = "taxonomy";
+            } else
+            {
+                //else by meta key.
+                $key = "meta_key";
+            }
+
+
+            //if the optional parameter is set and is set to true
+            if ( isset( $values[1] ) && true === $values[1] )
+            {
+                //values needed to be ordered by integer value
+                $orderby = 'meta_value_num';
+            } else
+            {
+                //values are to be order by string value
+                $orderby = 'meta_value';
+            }
+
+
+            //check if we're viewing this post type
+            if ( isset( $vars['post_type'] ) && $this->post_type_name == $vars['post_type'] ) {
+                //find the meta key we want to order posts by
+                if ( isset( $vars['orderby'] ) && $meta_key == $vars['orderby'] ) {
+                    //merge the query vars with our custom variables
+                    $vars = array_merge(
+                        $vars,
+                        array(
+                            'meta_key' => $meta_key,
+                            'orderby' => $orderby
+                        )
+                    );
+                }
+            }
+        }
+        return $vars;
+    }
+
+
+
+
+    /**
+     * Add Custom Fields
+     * Attach static custom field meta boxes to the post type
+     *
      * @param $custom_array
      */
 
@@ -370,10 +793,12 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                 switch ( $type )
                 {
                   case 'text':
+
                     $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
                     break;
 
                   case 'number':
+
                     $min  = isset( $field['min'] ) ? ' min="' . $field['min'] . '" ' : '';
                     $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
                     $step = isset( $field['step'] ) ? ' step="'. $field['step'] . '" ' : '';
@@ -381,12 +806,24 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="number" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
                     break;
 
+                  case 'audio':
+
+                    $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta  . '"' . $required . 'accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
+                    break;
+
+                  case 'image':
+
+                    $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta  . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
+                    break;
+
                   case 'textarea':
+
                     $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
                     break;
 
                   case 'editor':
-                    $settings = array(
+
+                    $settings = array( //TODO all fields here
                       'wpautop'       => false,
                       'media_buttons' => false,
                       'textarea_name' => 'static_fields[' . $id . ']',
@@ -405,11 +842,13 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     break;
 
                   case 'checkbox':
+
                     //WHat to write here!!! fieldset ???
                     $html = '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="static_fields[' . $id . ']" id="static_fields_' . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="static_fields_' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
                     break;
 
                   case 'select':
+
                     $html = '<tr><th scope="row"><label for="static_fields_' . $id . '" >' . $name . ': </label></th><td><select name="static_fields[' . $id . ']" id="static_fields_' . $id . '" >';
                     foreach ( $field['options'] as $option ) {
                       $html .= '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
@@ -418,6 +857,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     break;
 
                   case 'radio':
+
                     $html = '<tr><th scope="row"><label>' . $name . ': </label></th><td><ul>';
                     foreach ( $field['options'] as $option ) {
                       $html .= '<li><input type="radio" name="static_fields[' . $id . ']" id="static_fields_' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="static_fields_' . $option['value'] . '">' . $option['label'] . '</label></li>';
@@ -444,7 +884,9 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
 
     /**
-     * Attaches dynamic custom field meta boxes to the post type
+     * Add Dynamic Custom Fields
+     * Attach dynamic custom field meta boxes to the post type
+     *
      * @param $custom_array
      */
 
@@ -493,67 +935,76 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     foreach( $values as $index => $answer )
                     {
                       echo '<div class="repeater">';
+                      echo '<table class="form-table">';
 
                       $output = '';
 
                       foreach( $fields as $field )
                       {
-                        switch ( $field['type'] )
+                        $html        = '';
+                        $id          = SoundlushHelpers::uglify( $field['id'] );
+                        $name        = SoundlushHelpers::beautify( $field['name'] );
+                        $type        = isset( $field['type'] ) ? $field['type'] : 'text'; //default = text
+                        $required    = ( isset( $field['required'] ) && $field['required'] ) ? ' required' : ''; //default: false
+                        $description = isset( $field['desc'] ) ? '<span class="description">' . $field['desc'] . '</span>' : ''; //Optional
+                        $standard    = isset( $field['std'] ) ? $field['std'] : ''; //Optional
+                        //check if there is saved metadata for the field, if not use default value
+                        $meta        = isset( $answer[ $field['id'] ] ) ? $answer[ $field['id'] ] : $standard ;
+
+                        switch ( $type )
                         {
                           case 'text':
-                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . ': </label>';
-                            echo '<input type="text" name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" value="' . $answer[ $field['id'] ] . '" />';
 
-                            $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label><input type="text" name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '"/>';
+                            echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
                             break;
 
-                          case 'textarea':
-                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . ': </label>';
-                            echo '<textarea name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" cols="30" rows="4" style="width:50%" >' . $answer[ $field['id'] ] . '</textarea>';
-                            //echo '<p class="meta-desc">' . $field['desc'] . '</p>';
+                          case 'number':
 
-                            $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label><textarea name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" cols="30" rows="4" style="width:50%" ></textarea>'; //<p class="meta-desc">' . $field['desc'] . '</p>
+                            $min  = isset( $field['min'] ) ? ' min="' . $field['min'] . '" ' : '';
+                            $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
+                            $step = isset( $field['step'] ) ? ' step="'. $field['step'] . '" ' : '';
+
+                            echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="number" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
+                            break;
+
+                          case 'audio':
+
+                            echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta  . '"' . $required . 'accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
+                            break;
+
+                          case 'image':
+
+                            echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta  . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
+                            break;
+
+
+                          case 'textarea':
+
+                            echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
                             break;
 
 
                           case 'checkbox':
-                            echo '<input type="checkbox" name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" ' . (isset($answer[ $field['id'] ]) ? "checked" : '') . '/>';
-                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . '</label>';
 
-                            $output .= '<input type="checkbox" name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '"/><label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . '</label>';
+                            echo '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
                             break;
 
                           case 'select':
-                            echo '<label for="dynamic_fields_' . $c . '_' . $field['id'] . '" >' . $field['name'] . ': </label>';
-                            echo '<select name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $field['id'] . '" >';
-                            foreach ( $field['options'] as $option ) {
-                              echo '<option value="' . $option['value'] . '" ' . ( $answer[ $field['id'] ] == $option['value'] ? '" selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
-                            }
-                            echo '</select>';
 
-                            $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label>';
-                            $output .= '<select name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" >';
+                            echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '" >' . $name . ': </label></th><td><select name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" >';
                             foreach ( $field['options'] as $option ) {
-                              $output .= '<option value="' . $option['value'] . '">' . $option['label'] . '</option>';
+                              echo '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
                             }
-                            $output .='</select>';
+                            echo '</select></br>' . $description . '</td></tr>';
                             break;
 
                           case 'radio':
-                            echo '<ul><label>' . $field['name'] . ': </label>';
-                            foreach ( $field['options'] as $option ) {
-                              echo '<input type="radio" name="dynamic_fields[' . $c . '][' . $field['id'] . ']" id="dynamic_fields_' . $c . '_' . $option['value'] . '" value="' . $option['value'] . '"';
-                              echo ( $answer[ $field['id'] ] == $option['value'] ? 'checked="checked"' : '') . ' />';
-                              echo '</li><label for="dynamic_fields_' . $c . '_' . $option['value'] . '">' . $option['label'] . '</label></li>';
-                            }
-                            echo '</ul>';
 
-                            $output .= '<ul><label>' . $field['name'] . ': </label>';
+                            echo '<tr><th scope="row"><label>' . $name . ': </label></th><td><ul>';
                             foreach ( $field['options'] as $option ) {
-                              $output .= '<input type="radio" name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $option['value'] . '" value="' . $option['value'] . '" />';
-                              $output .= '</li><label for="dynamic_fields_count_variable_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+                              echo '<li><input type="radio" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="dynamic_fields_' . $c . '_' . $option['value'] . '">' . $option['label'] . '</label></li>';
                             }
-                            $output .= '</ul>';
+                            echo '</ul>' . $description . '</td></tr>';
                             break;
 
                           default:
@@ -561,55 +1012,85 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                         }
                       }
                       $c = $c +1;
+                      echo '</table>';
                       echo '<button class="remove button-secondary">' .  __( 'Remove Item' ) .  '</button>';
                       echo '</div>';
                     }
                   }
-                } else {
-                  //if there is NO saved postdata for the post
-                  foreach( $fields as $field )
+                }
+
+                //Add new
+                foreach( $fields as $field )
+                {
+                  $id          = SoundlushHelpers::uglify( $field['id'] );
+                  $name        = SoundlushHelpers::beautify( $field['name'] );
+                  $type        = isset( $field['type'] ) ? $field['type'] : 'text'; //default = text
+                  $required    = ( isset( $field['required'] ) && $field['required'] ) ? ' required' : ''; //default: false
+                  $description = isset( $field['desc'] ) ? '<span class="description">' . $field['desc'] . '</span>' : ''; //Optional
+                  $standard    = isset( $field['std'] ) ? $field['std'] : ''; //Optional
+
+                  //TODO add value = standart
+
+                  switch ( $type )
                   {
-                    switch ( $field['type'] )
-                    {
-                      case 'text':
-                        $output .= '<label for="dynamic_fields[count_variable][' . $field['id'] . ']" >' . $field['name'] . ': </label><input type="text" name="dynamic_fields[count_variable][' . $field['id'] . ']"/>';
-                        break;
+                    case 'text':
 
-                      case 'textarea':
-                        $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label><textarea name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" cols="30" rows="4" style="width:50%" ></textarea>'; //<p class="meta-desc">' . $field['desc'] . '</p>
-                        break;
+                      $output .=  '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . ' />' . $description . '</td></tr>';
+                      break;
 
-                      case 'checkbox':
-                        $output .= '<label for="dynamic_fields[count_variable][' . $field['id'] . ']" ><input type="checkbox" name="dynamic_fields[count_variable][' . $field['id'] . ']"/>' . $field['name'] . '</label>';
-                        break;
+                    case 'number':
 
-                      case 'select':
-                        $output .= '<label for="dynamic_fields_count_variable_' . $field['id'] . '" >' . $field['name'] . ': </label>';
-                        $output .= '<select name="dynamic_fields[count_variable][' . $field['id'] . ']" id="dynamic_fields_count_variable_' . $field['id'] . '" >';
-                        foreach ( $field['options'] as $option ) {
-                          $output .= '<option value="' . $option['value'] . '">' . $option['label'] . '</option>';
-                        }
-                        $output .='</select>';
-                        break;
+                      $min  = isset( $field['min'] ) ? ' min="' . $field['min'] . '" ' : '';
+                      $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
+                      $step = isset( $field['step'] ) ? ' step="'. $field['step'] . '" ' : '';
 
-                      case 'radio':
-                        $output .= '<ul><label>' . $field['name'] . ': </label>';
-                        foreach ( $field['options'] as $option ) {
-                          $output .= '</li><label for="static_fields_count_variable_' . $option['value'] . '">';
-                          $output .= '<input type="radio" name="static_fields[count_variable][' . $field['id'] . ']" id="static_fields_count_variable_' . $option['value'] . '" value="' . $option['value'] . '" />' . $option['label'] . '</label></li>';
-                        }
-                        $output .= '</ul>';
-                        break;
+                      $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="number" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
+                      break;
 
-                    }
+                    case 'audio':
+
+                      $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . 'accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
+                      break;
+
+                    case 'image':
+
+                      $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
+                      break;
+
+                    case 'textarea':
+
+                      $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' ></textarea>'. $description . '</td></tr>';
+                      break;
+
+                    case 'checkbox':
+
+                      $output .= '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '" /><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
+                      break;
+
+                    case 'select':
+
+                      $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '" >' . $name . ': </label></th><td><select name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '" >';
+                      foreach ( $field['options'] as $option ) {
+                        $output .= '<option value="' . $option['value'] . '">' . $option['label'] . '</option>';
+                      }
+                      $output .= '</select></br>' . $description . '</td></tr>';
+                      break;
+
+                    case 'radio':
+
+                      $output .= '<tr><th scope="row"><label>' . $name . ': </label></th><td><ul>';
+                      foreach ( $field['options'] as $option ) {
+                        $output .= '<li><input type="radio" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $option['value'] . '" value="' . $option['value'] . '"' . $required . '/><label for="dynamic_fields_count_variable_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+                      }
+                      $output .= '</ul>' . $description . '</td></tr>';
+                      break;
                   }
-
                 }
 
 
               ?>
-              <span id="here"></span>
-              <button class="add button-primary"><?php _e( 'Add Item' ); ?></button>
+              <span id="here" style="display: block;"></span>
+              <button class="add button-primary" style="margin: 2em 0;"><?php _e( 'Add Item' ); ?></button>
 
               <script>
                   var $ =jQuery.noConflict();
@@ -624,7 +1105,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                         //substitute placeholder index by the count variable
                         var res = output.replace(/count_variable/g, count);
 
-                        $('#here').append('<div>'+ res +'<button class="remove button-secondary">Remove Answer</button></div>' );
+                        $('#here').append( '<div class="repeater"><table class="form-table">' + res + '</table><button class="remove button-secondary">Remove Answer</button></div>' );
 
                         return false;
                     //}
@@ -652,7 +1133,8 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
 
     /**
-     * Listens for when the post type is being saved
+     * Save
+     * Listen for when the post type is being saved
      *
      */
 
@@ -685,11 +1167,64 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
             global $fields;
 
             //check if there are custom fields
-            if( $fields  && ! empty( $fields ) ){
+            if( $fields  && ! empty( $fields ) )
+            {
+              // TODO Sanitizes inputs
+              foreach ( $fields as $field )
+              {
+                if( isset( $_POST[$field['id']] ) )
+                {
+                  switch ( $field['type'] = 'editor' ) {
+                    case 'editor':
+                      //$_POST[ $field['id']] = htmlspecialchars( $_POST[ $field['id'] ] );
+                      break;
 
-              // TODO Checks for input (required fields) and sanitizes/saves if needed
-              // for editor type => htmlspecialchars( $_POST[ $field['id'] ] );
-              // for text type => sanitize_text_field( $_POST[ $field['id'] ] );
+                    case 'text':
+                      //$_POST[ $field['id']] = sanitize_text_field( $_POST[ $field['id'] ] );
+                      break;
+
+                    case 'audio':
+                    case 'image':
+                      //$_POST[ $field['id']] = sanitize_file_name( $_POST[ $field['id'] ] );
+                      //sanitize mime type
+                      break;
+
+                    default:
+                      break;
+                  }
+                }
+              }
+
+              // Make sure the file array isn't empty
+              // if(!empty( $_FILES['static_fields'][$field['id']] )) {
+              //
+              //   // Setup the array of supported file types.
+              //   $supported_types = array('image/jpeg', 'image/png', image/gif);
+              //
+              //   // Get the file type of the upload
+              //   $arr_file_type = wp_check_filetype(basename($_FILES['static_fields'][$field['id']]));
+              //   $uploaded_type = $arr_file_type['type'];
+              //
+              //   // Check if the type is supported. If not, throw an error.
+              //   if(in_array($uploaded_type, $supported_types)) {
+              //
+              //   // Use the WordPress API to upload the file
+              //   $upload = wp_upload_bits(
+              //     $_FILES['static_fields'][$field['id']],
+              //     null,
+              //     file_get_contents($_FILES['wp_custom_attachment']['tmp_name'])
+              //   );
+              //         if(isset($upload['error']) && $upload['error'] != 0) {
+              //             wp_die('There was an error uploading your file. The error is: ' . $upload['error']);
+              //         } else {
+              //             update_post_meta($post->ID, 'wp_custom_attachment', $upload);
+              //         }
+              //
+              //     } else {
+              //         wp_die("The file type that you've uploaded is not a PDF.");
+              //     }
+              //
+              //}
 
               update_post_meta( $post->ID, 'static_fields', $_POST['static_fields']);
               update_post_meta( $post->ID, 'dynamic_fields', $_POST['dynamic_fields']);
@@ -700,6 +1235,11 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
       );
 
     }
+
+
+
+
+
 
   }
 }

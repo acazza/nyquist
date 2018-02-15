@@ -1,5 +1,11 @@
 <?php
 
+function update_edit_form() {
+    echo ' enctype="multipart/form-data"';
+}
+add_action('post_edit_form_tag', 'update_edit_form');
+
+
 
 if( !class_exists( 'SoundlushBook') )
 {
@@ -15,7 +21,13 @@ if( !class_exists( 'SoundlushBook') )
         'hierarchical' => true,
       );
 
+      // Create Custom Taxonomy
+      $genre_args = array(
+        'hierarchical' => true,
+      );
+
       $this->add_taxonomy( 'author', 'radio' , $authors_args );
+      $this->add_taxonomy( 'genre', 'check' , $genre_args );
 
 
       // Create Custom Fields
@@ -107,6 +119,26 @@ if( !class_exists( 'SoundlushBook') )
         )
       );
 
+      // define the columns to appear on the admin edit screen
+      $this->columns(array(
+          'cb'          => '<input type="checkbox" />',
+          'title'       => __('Title'),
+          'author'      => __('Author'),
+          'genre'       => __('Genre'),
+          'date'        => __('Date')
+      ));
+
+      // make rating and price columns sortable
+      $this->sortable(array(
+          'author' => array('price', true),
+          'genre' => array('rating', true)
+      ));
+
+      //add taxonomy to admin edit columns.
+      $this->add_filter( 'manage_edit-' . $this->post_type_name . '_columns', array( &$this, 'add_admin_columns' ) );
+      //populate the taxonomy columns with the posts terms.
+      $this->add_action( 'manage_' . $this->post_type_name . '_posts_custom_column', array( &$this, 'populate_admin_columns' ), 10, 2 );
+
     }
   }
 }
@@ -195,10 +227,25 @@ $quiz->add_custom_fields(
           'desc'      => 'Enter the number of questions in your quiz.',
           'id'        => 'num_questions',
           'std'       => 10,
+          'required'  => true,
           'type'      => 'number',
           'min'       => 5,
           'max'       => 15,
           'step'      => 1
+      ),
+      array(
+          'name'      => 'Upload an audio file',
+          'desc'      => 'Upload an audio file.',
+          'id'        => 'audio_file',
+          'std'       => '',
+          'type'      => 'audio',
+      ),
+      array(
+          'name'      => 'Upload an image file',
+          'desc'      => 'Upload an image file.',
+          'id'        => 'image_file',
+          'std'       => '',
+          'type'      => 'image',
       )
     ),
     'context'   => 'normal',
