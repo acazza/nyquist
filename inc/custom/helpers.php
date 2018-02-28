@@ -86,5 +86,14 @@ if( !class_exists( 'SoundlushHelpers') )
         }
         return $plural;
     }
+
+    public static function isPosttype( $type )
+    {
+        global $wp_query;
+        if($type == get_post_type($wp_query->post->ID)) return true;
+        return false;
+    }
+
+
   }
 }

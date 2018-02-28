@@ -7,7 +7,6 @@
 
 // add svg sprite at the bottom of the document
  function soundlush_include_svg_icons(){
-    //$svg_icons = get_template_directory() . '/assets/icon/svg-icons.svg';
     $svg_icons = get_template_directory() . '/assets/icon/inline.svg.php';
     if( file_exists( $svg_icons ) ):
       require_once( $svg_icons );
@@ -43,7 +42,7 @@
 	// Begin SVG markup.
 	$output = '<svg class="icon icon-soundlush icon-' . esc_attr( $args['icon'] ) . ' ' . esc_attr( $args['class'] ) .'"' . $aria_hidden . $aria_labelledby . ' role="img">';
 
-  
+
 	/*
 	 * Display the icon.
 	 * The whitespace around `<use>` is intentional - it is a work around to a keyboard navigation bug in Safari 10.

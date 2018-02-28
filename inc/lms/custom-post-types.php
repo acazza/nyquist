@@ -315,6 +315,11 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
         );
       }
 
+      //add taxonomy to admin edit columns.
+      $this->add_filter( 'manage_edit-' . $this->post_type_name . '_columns', array( &$this, 'add_admin_columns' ) );
+      //populate the taxonomy columns with the posts terms.
+      $this->add_action( 'manage_' . $this->post_type_name . '_posts_custom_column', array( &$this, 'populate_admin_columns' ), 10, 2 );
+
       //generate custom metabox based on input type
       if ($type != 'check' ) $this->setup_custom_metabox($taxonomy_name, $post_type_name, $type);
     }
@@ -485,6 +490,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
     {
         //get wordpress $post object.
         global $post;
+        $post_id = $post->ID;
 
         //determine the column
         switch( $column ) {
@@ -496,7 +502,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                 $terms = get_the_terms( $post_id, $column );
 
                 //if we have terms.
-                if ( ! empty( $terms ) )
+                if( ! empty( $terms ) )
                 {
                     $output = array();
 
@@ -517,8 +523,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                     echo join( ', ', $output );
 
                 //if no terms found.
-                } else
-                {
+                } else {
                     //get the taxonomy object for labels
                     $taxonomy_object = get_taxonomy( $column );
                     //echo no terms.
@@ -530,6 +535,14 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
             case 'post_id' :
 
                 echo $post->ID;
+                break;
+
+
+            //if column is for the post parent.
+            case 'post_parent' :
+                //echo '<a href="' . get_the_permalink($post->post_parent) . '>';
+                echo get_the_title($post->post_parent);
+                //echo '</a>';
                 break;
 
             //if the column is prepended with 'meta_', this will automatically retrieve the meta values and display them.
@@ -713,7 +726,6 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                 $orderby = 'meta_value';
             }
 
-
             //check if we're viewing this post type
             if ( isset( $vars['post_type'] ) && $this->post_type_name == $vars['post_type'] ) {
                 //find the meta key we want to order posts by
@@ -729,6 +741,9 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
                 }
             }
         }
+
+        print_r($vars);
+
         return $vars;
     }
 
@@ -739,7 +754,27 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
      * Add Custom Fields
      * Attach static custom field meta boxes to the post type
      *
-     * @param $custom_array
+     * @param array $custom_array {
+     *                @type string  $id      Metabox ID.
+     *                @type string  $title   Metabox Title.
+     *                @type array   $fields  Custom Field list. {
+     *                  @type string  $id           Custom Field ID.
+     *                  @type string  $name         Custom Field Name.
+     *                  @type string  $description  Custom Field Description Text. Optional. Default: ''.
+     *                  @type string  $std          Custom Field Default Value. Optional. Default: ''.
+     *                  @type boolean $required     Custom Field Required. Optional. Default: False.
+     *                  @type string  $type         Custom Field Input Type (text, textarea, editor, number, audio, image,  checkbox, radio or select). Optional. Default: 'text'.
+     *                  @type integer $min          Custom Field Property for Input Type 'number'.
+     *                  @type integer $max          Custom Field Property for Input Type 'number'.
+     *                  @type integer $step         Custom Field Property for Input Type 'number'.
+     *                  @type array   $options      Custom Field Property for Input Type 'number'. {
+     *                    @type integer $label         Custom Field Property for Input Type 'radio' and 'select'.
+     *                    @type integer $value         Custom Field Property for Input Type 'radio' and 'select'.
+     *                  }
+     *                }
+     *                @type string  $context   Metabox Context.
+     *                @type string  $priority  Metabox Positioning.
+     *              }
      */
 
     public function add_custom_fields( $custom_array )
@@ -801,7 +836,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
                     $min  = isset( $field['min'] ) ? ' min="' . $field['min'] . '" ' : '';
                     $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
-                    $step = isset( $field['step'] ) ? ' step="'. $field['step'] . '" ' : '';
+                    $step = isset( $field['step'] ) ? ' step="' . $field['step'] . '" ' : '';
 
                     $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="number" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
                     break;
@@ -962,7 +997,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
                             $min  = isset( $field['min'] ) ? ' min="' . $field['min'] . '" ' : '';
                             $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
-                            $step = isset( $field['step'] ) ? ' step="'. $field['step'] . '" ' : '';
+                            $step = isset( $field['step'] ) ? ' step="' . $field['step'] . '" ' : '';
 
                             echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="number" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
                             break;
@@ -1042,7 +1077,7 @@ if( !class_exists( 'SoundlushCustomPostType' ) )
 
                       $min  = isset( $field['min'] ) ? ' min="' . $field['min'] . '" ' : '';
                       $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
-                      $step = isset( $field['step'] ) ? ' step="'. $field['step'] . '" ' : '';
+                      $step = isset( $field['step'] ) ? ' step="' . $field['step'] . '" ' : '';
 
                       $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="number" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
                       break;

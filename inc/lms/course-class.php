@@ -1,9 +1,6 @@
 <?php
 
-function update_edit_form() {
-    echo ' enctype="multipart/form-data"';
-}
-add_action('post_edit_form_tag', 'update_edit_form');
+
 
 
 
@@ -123,21 +120,24 @@ if( !class_exists( 'SoundlushBook') )
       $this->columns(array(
           'cb'          => '<input type="checkbox" />',
           'title'       => __('Title'),
-          'author'      => __('Author'),
+          'post_parent'      => __('Enciclopedia'),
+          //'author'      => __('Author'),
           'genre'       => __('Genre'),
           'date'        => __('Date')
       ));
 
+
+      // populate the price column
+      $this->populate_column('post_parent', function($column, $post) {
+          echo get_the_title( $post->post_parent);
+      });
+
       // make rating and price columns sortable
       $this->sortable(array(
-          'author' => array('price', true),
-          'genre' => array('rating', true)
+        //'post_parent' => array('post_parent', false),
+        //  'author' => array('author', true),
+        'genre' => array('genre', false)
       ));
-
-      //add taxonomy to admin edit columns.
-      $this->add_filter( 'manage_edit-' . $this->post_type_name . '_columns', array( &$this, 'add_admin_columns' ) );
-      //populate the taxonomy columns with the posts terms.
-      $this->add_action( 'manage_' . $this->post_type_name . '_posts_custom_column', array( &$this, 'populate_admin_columns' ), 10, 2 );
 
     }
   }

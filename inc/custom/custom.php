@@ -5,6 +5,28 @@
  * @package com.soundlush.theme.v1
  */
 
+function update_edit_form() {
+    echo ' enctype="multipart/form-data"';
+}
+add_action('post_edit_form_tag', 'update_edit_form');
+
+
+
+// function enable_extended_upload($mimes = array()) {
+//
+// 	// Add a key and value for all image file type
+// 	$mimes['jpg']  = "image/jpg";
+//   $mimes['jpeg'] = "image/jpeg";
+//   $mimes['png']  = "image/png";
+//   $mimes['gif']  = "image/gif";
+//   $mimes['bmp']  = "image/bmp";
+//   $mimes['tiff'] = "image/tiff";
+//
+// 	return $mimes;
+// }
+// add_filter('upload_mimes', 'enable_extended_upload');
+// //add_action('upload_mimes', 'enable_extended_upload');
+
 
 function soundlush_posted_meta()
 {
@@ -125,7 +147,7 @@ function soundlush_get_comment_navigation()
 function soundlush_share_post( $content )
 {
   //if( is_single() && !( is_product() ) && !( is_post_type( 'course' ) ) && !( is_post_type( 'lesson' ) ) ):
-  if( is_single() && is_post_type( 'post' ) ):
+  if( is_single() && SoundlushHelpers::isPosttype( 'post' ) ):
     $content .= '<div class="share-post"><h4>Share this</h4>';
 
     $title = get_the_title();
