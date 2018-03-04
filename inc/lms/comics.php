@@ -1,7 +1,26 @@
 <?php
 
+$options = array(
+    'hierarchical' => true,
+    'supports'     => array( 'title', 'editor', 'author','thumbnail', 'excerpt', 'page-attributes' )
+);
+
+$anthology = new SoundlushPostType('anthology', $options);
+$anthology->taxonomy('volume');
+$anthology->register();
+
+
+
+$options = array(
+    'hierarchical' => true,
+    'rewrite'      => array( 'slug'=> 'anthology' ), // set parent slug
+    'supports'     => array( 'title', 'editor', 'author','thumbnail', 'excerpt', 'page-attributes' )
+);
+
 // create a Comic Book Post Type
-$comics = new SoundlushPostType('comic_book');
+$comics = new SoundlushPostType('comic_book', $options);
+
+$comics->setAsParent('anthology');
 
 // add the Volume Taxonomy
 $comics->taxonomy('volume');
@@ -144,13 +163,13 @@ $volume->customfields()->add(array(
         'id'        => 'meta_mycourse',
         'std'       => 'Default value here.',
         'type'      => 'relation',
-        'posttype'  => 'comic_book',
+        'posttype'  => 'anthology',
         'required'  =>  false
     ),
 ));
 
 // filter terms to be displayed on Edit Post Page
-//$volume->filterTerms('meta_mycourse', 'post_parent');
+$volume->filterTerms('meta_mycourse', 'post_parent');
 
 // modify metabox on Edit Post Page ('radio' or 'select')
 $volume->modifyMetabox('radio', 'comic_book');
@@ -164,10 +183,15 @@ $volume->columns()->add([
 ]);
 
 // populate the new column
-$volume->columns()->populate('popularity', function($content, $column, $term_id) {
+$volume->columns()->populate('course', function($content, $column, $term_id) {
    $termmeta = get_term_meta($term_id, 'term_meta', true);
-   echo isset( $termmeta['meta_mycourse'] ) ? $termmeta['meta_mycourse'] : '';
+   echo isset( $termmeta['meta_mycourse'] ) ? get_the_title( $termmeta['meta_mycourse'] ) : '';
 });
+
+// set sortable columns
+$volume->columns()->sortable([
+    'course' => [ 'term_meta[meta_mycourse]', true],
+]);
 
 // register the taxonomy to WordPress
 $volume->register();

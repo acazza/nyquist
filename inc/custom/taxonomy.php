@@ -58,6 +58,8 @@ class SoundlushTaxonomy
      */
     public $columns;
 
+    public $filter_metakey;
+    public $filter_metavalue;
 
 
     /**
@@ -393,37 +395,44 @@ class SoundlushTaxonomy
     *  @param string $metakey
     *  @param mixed $metavalue
     */
-    function filterTerms( $metakey, $metavalue){
-
-      // $args = array(
-      //     'hide_empty' => false, // also retrieve terms which are not used yet
-      //     'meta_query' => array(
-      //         array(
-      //            'key'       => $metakey,
-      //            'value'     => $metavalue,
-      //            'compare'   => 'LIKE'
-      //         )
-      //     ));
-      //
-      // $filtered_terms = get_terms( $this->name, $args );
-
-      add_action('pre_get_terms', function() use( $metakey, $metavalue ){
-        $meta_query_args = array(
-            'relation' => 'AND', // Optional, defaults to "AND"
-            array(
-                'key'     => 'order_index',
-                'value'   => 0,
-                'compare' => '>='
-            )
-        );
-        $meta_query = new WP_Meta_Query( $meta_query_args );
-        $query->meta_query = $meta_query;
-        $query->orderby = 'position_clause';
-
-      }, 10, 1);
+    function filterTerms( $metakey, $metavalue)
+    {
+      $this->metakey = $metakey;
+      //$this->metavalue = 247;
     }
 
+    // function switch_terms_filter( $_set = NULL )
+    // {
+    //   static $set;
+    //   if( ! is_null($_set) ) $set = $_set;
+    //   return $set;
+    // }
 
+
+    function your_filter_callback( $terms, $taxonomies, $args, $term_query )
+    {
+        // remove filter after 1st run
+        remove_filter( current_filter(), __FUNCTION__, 10, 4 );
+
+        // is the switch ON? If not do nothing.
+        // if( $this->switch_terms_filter() !== 1 ) {
+        //   //return $terms;
+        // };
+
+        //$this->switch_terms_filter(0); // turn the switch OFF
+
+        //$args['include'] =  array(47, 48);
+        $args['meta_query'] = array(
+            array(
+              'key'     => 'term_meta',
+              'value'   =>  sprintf(':"%s";', $this->metavalue),
+              'compare' => 'LIKE',
+            )
+        );
+
+        $terms = $term_query->query( $args );
+        return $terms;
+    }
 
 
     /**
@@ -455,12 +464,18 @@ class SoundlushTaxonomy
     */
     public function add_taxonomy_metabox( $post, $data )
     {
-        // get input type
-        $type      = $data['args'];
 
-        // set up the taxonomy object and get terms
-        //$tax       = get_taxonomy($this->name);
-        //$terms     = get_terms($this->name, array('hide_empty' => 0));
+        $this->metavalue = $post->post_parent;
+
+        add_filter( 'wp_terms_checklist_args', function( $args )
+        {
+            // turn the switch ON
+            //$this->switch_terms_filter(1);
+            // add get_terms filter
+            add_filter( 'get_terms', [&$this, 'your_filter_callback'], 10, 4 );
+            // we don't want to affect wp_terms_checklist $args
+            return $args;
+        });
 
         // set name of the form
         $name      = 'tax_input[' . $this->name . ']';
@@ -471,6 +486,9 @@ class SoundlushTaxonomy
         $current   = ($current ? $current->term_id : 0);
 
 
+        // get input type
+        $type = $data['args'];
+
         // check taxonomy input type and display taxonomy terms
         switch( $type )
         {
@@ -479,25 +497,15 @@ class SoundlushTaxonomy
               <div id="<?php echo $this->name; ?>-all" class="tabs-panel">
                 <ul id="<?php echo $this->name; ?>checklist" class="list:<?php echo $this->name ?> categorychecklist form-no-clear">
                   <?php
-                  // foreach($terms as $term)
-                  // {
-                  //     $id = $this->name.'-'.$term->term_id;
-                  //     echo "<li id='$id'><label class='selectit'>";
-                  //     echo "<input type='radio' id='in-$id' name='{$name}'" . checked($current,$term->term_id,false ) . "value='$term->term_id' />$term->name<br />";
-                  //     echo "</label></li>";
-                  // }
-
-                  $walker = new SoundlushWalkerRadioTaxonomy;
-                   wp_terms_checklist( $post->ID, array(
+                  wp_terms_checklist( $post->ID, array(
                       'descendants_and_self'  => 0,
                       'popular_cats'          => false,
                       'echo'                  => true,
                       'taxonomy'              => $this->name,
                       'selected_cats'         => $current,
                       'checked_ontop'         => false,
-                      'walker'                => $walker
+                      'walker'                => new SoundlushWalkerRadioTaxonomy
                     ) );
-
                   ?>
                 </ul>
               </div>
@@ -508,25 +516,34 @@ class SoundlushTaxonomy
           case 'select': ?>
             <div id="taxonomy-<?php echo $this->name; ?>" class="categorydiv">
               <div id="<?php echo $this->name; ?>-all" class="tabs-panel">
-                <!-- <select id="<?php echo $this->name; ?>-select" name="<?php echo $name ?>" class="widefat form-no-clear" style="margin: 1em 0"> -->
                   <?php
-                  // foreach($terms as $term)
-                  // {
-                  //     $id = $this->name.'-'.$term->term_id;
-                  //     echo '<option id="in-' . $id . '" value="' . $term->term_id  . '" ' . selected( $current, $term->term_id, false ) . ' >';
-                  //     echo $term->name;
-                  //     echo '</option>';
-                  // }
+                  // filtered included terms
+                  $included_terms = get_terms(
+                      array(
+                          'taxonomy'   => $this->name,
+                          'orderby'    => 'slug',
+                          'order'      => 'ASC',
+                          'hide_empty' => '0',
+                          'fields'     => 'ids',
+                          'meta_query' => array(
+                              array(
+                                'key'     => 'term_meta',
+                                'value'   =>  sprintf(':"%s";', $this->metavalue),
+                                'compare' => 'LIKE',
+                          ))
+                      )
+                  );
 
                   wp_dropdown_categories( array(
                       'show_option_all'    => '',
                       'show_option_none'   => 'Choose a '. $this->singular,
-                      'orderby'            => 'ID',
+                      'orderby'            => 'slug',
                       'order'              => 'ASC',
                       'show_count'         => 0,
                       'hide_empty'         => 0,
                       'child_of'           => 0,
                       'exclude'            => '',
+                      'include'            => $included_terms,
                       'echo'               => 1,
                       'selected'           => $current,
                       'hierarchical'       => 1,
@@ -538,9 +555,7 @@ class SoundlushTaxonomy
                       'taxonomy'           => $this->name,
                       'hide_if_empty'      => false
                   ) );
-
                   ?>
-                <!-- </select> -->
               </div>
             </div>
             <?php

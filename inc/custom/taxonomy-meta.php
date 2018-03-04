@@ -79,6 +79,7 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
 
             $html .= '<label for="term_meta_' . $id . '">' . $name . '</label>';
             $html .= '<select class="postform" name="term_meta['. $id . ']" id="term_meta_'. $id . '">';
+              $html .= '<option value="0" >Choose a(n) ' . SoundlushHelpers::beautify($posttype) . '</option>';
             foreach ( $items as $item ) {
               $html .= '<option value="' . $item->ID . '" >' . $item->post_title . '</option>';
             }
@@ -148,6 +149,7 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
             $html .= '<label for="term_meta_' . $id . '">' .$name . '</label>';
             $html .= '</th><td>';
             $html .= '<select class="postform" name="term_meta['. $id . ']" id="term_meta_'. $id . '">';
+              $html .= '<option value="0"' . ( $meta == 0 ? '" selected="selected"' : '' ) .  ' >Choose a(n) ' . SoundlushHelpers::beautify($posttype) . '</option>';
             foreach ( $items as $item ) {
               $html .= '<option value="' . $item->ID . '"' . ( $meta == $item->ID ? '" selected="selected"' : '' ) .  ' >' . $item->post_title . '</option>';
             }

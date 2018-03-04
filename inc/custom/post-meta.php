@@ -456,7 +456,7 @@ class SoundlushPostMeta
   {
       global $post;
 
-      $fields = $this->fields;
+      //$fields = $this->fields;
 
       // deny WordPress autosave function
       if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;

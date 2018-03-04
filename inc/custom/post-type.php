@@ -76,6 +76,12 @@ class SoundlushPostType
      */
     public $customfields;
 
+    /**
+     * The parent PostType
+     * @var string
+     */
+    public $parent;
+
 
 
     /**
@@ -181,14 +187,17 @@ class SoundlushPostType
 
 
     /**
-     * Flush rewrite rules
+     * Flush
+     * Flush rewrite rules on theme (de)activation
      * @link https://codex.wordpress.org/Function_Reference/flush_rewrite_rules
      * @param  boolean $hard
      * @return void
      */
     public function flush($hard = true)
     {
+      add_action( 'after_switch_theme', function() use($hard){
         flush_rewrite_rules($hard);
+      });
     }
 
 
@@ -248,6 +257,74 @@ class SoundlushPostType
             // listen for the save post hook to save custom fields
             add_action( 'save_post', [&$this,'saveCustomFields' ], 10, 1 );
         }
+        //flush rewrite rules
+        $this->flush();
+    }
+
+
+
+    /**
+     * Set as Parent
+     * Create parent-child relationship between Post Types (parent must already be registered)
+     * @return void
+     */
+    public function setAsParent( $parent )
+    {
+      if( ! post_type_exists($parent) ) {
+        $this->parent = $parent;
+      } else {
+        return;
+      }
+
+      //perform filter on 'Edit $child' page
+      add_filter( 'page_attributes_dropdown_pages_args', array( &$this, 'populateParent' ), 10, 2 );
+      //also perform the same filter when doing a 'Quick Edit'
+      add_filter( 'quick_edit_dropdown_pages_args', array( &$this, 'populateParent' ), 10, 2 );
+      //clean up permalink
+      add_filter( 'pre_get_posts', array( &$this, 'cleanPermalink' ) );
+    }
+
+
+
+    /**
+     * Populate Parent
+     * Populate parent dropdown with list of posts from parent Post Type
+     * @return array
+     */
+    public function populateParent($dropdown_args)
+    {
+        global $post;
+        if ( $this->name == $post->post_type ){
+          $dropdown_args['post_type'] = $this->parent;
+        }
+        return $dropdown_args;
+    }
+
+
+
+    /**
+     * Clean Permalink
+     * Fix broken permalink after parent relationship is established
+     * @return void
+     */
+    public function cleanPermalink( $query )
+    {
+      //run this code only when we are on the public archive
+      if( ( isset($query->query_vars['post_type']) && $this->name != $query->query_vars['post_type']) || ! $query->is_main_query() || is_admin() ) return;
+
+
+      //$parent = isset($query->query_vars['post_parent']) ? get_post_type($query->query_vars['post_parent']) . '/' : '';
+
+      //fix query for hierarchical child permalinks
+      if ( isset( $query->query_vars['name']) && isset( $query->query_vars[$this->name] ) )
+      {
+        //remove the parent name (however, old permalink will still work)
+        $query->set( 'name', basename( untrailingslashit( $query->query_vars['name'] ) ));
+        //unset this ( $child query_var is a duplicate of name)
+        $query->set( $this->name, null );
+      }
+
+      //flush_rewrite_rules();
     }
 
 
@@ -302,7 +379,7 @@ class SoundlushPostType
             if (in_array($key, ['plural', 'slug'])) {
                 $name .= 's';
             }
-            // asign the name to the PostType property
+            // assign the name to the PostType property
             $this->$key = $name;
         }
     }
@@ -325,6 +402,7 @@ class SoundlushPostType
 
         // replace defaults with the options passed
         $options = array_replace_recursive($options, $this->options);
+
         // create and set labels
         if (!isset($options['labels'])) {
             $options['labels'] = $this->createLabels();
