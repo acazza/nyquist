@@ -8,24 +8,9 @@
 function update_edit_form() {
     echo ' enctype="multipart/form-data"';
 }
-add_action('post_edit_form_tag', 'update_edit_form');
+add_action( 'post_edit_form_tag', 'update_edit_form' );
 
 
-
-// function enable_extended_upload($mimes = array()) {
-//
-// 	// Add a key and value for all image file type
-// 	$mimes['jpg']  = "image/jpg";
-//   $mimes['jpeg'] = "image/jpeg";
-//   $mimes['png']  = "image/png";
-//   $mimes['gif']  = "image/gif";
-//   $mimes['bmp']  = "image/bmp";
-//   $mimes['tiff'] = "image/tiff";
-//
-// 	return $mimes;
-// }
-// add_filter('upload_mimes', 'enable_extended_upload');
-// //add_action('upload_mimes', 'enable_extended_upload');
 
 
 function soundlush_posted_meta()

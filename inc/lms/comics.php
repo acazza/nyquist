@@ -69,11 +69,11 @@ $comics->customfields()->add( array(
         'required'  => false
     ),
     array(
-      'name'      => 'mycustom_4',
-      'desc'      => 'This is my forth custom field.',
-      'id'        => 'meta_mycustom_4',
-      'type'      => 'relation',
-      'posttype'  => 'comic_book'
+        'name'      => 'mycustom_4',
+        'desc'      => 'This is my forth custom field.',
+        'id'        => 'meta_mycustom_4',
+        'type'      => 'relation',
+        'posttype'  => 'comic_book'
     )
   )
 ));
@@ -84,10 +84,10 @@ $comics->customfields()->add(array(
   'fields'    => array(
     array(
         'name'      => 'mycustom',
-        'desc'      => 'This is my first custom field.',
+        'desc'      => 'This is my file custom field.',
         'id'        => 'meta_mycustom',
-        'std'       => 'Default value here.',
-        'type'      => 'text',
+        'std'       => 'No saved image.',
+        'type'      => 'image',
         'required'  => false
     )),
 ));
@@ -96,13 +96,13 @@ $comics->customfields()->addRepeater(array(
     'id'        => 'encyclopedia_info',
     'title'     => __( 'Enciclopedia Info' ),
     'fields'    => array(
-      array(
-          'name'      => 'Upload an image file',
-          'desc'      => 'Upload an image file.',
-          'id'        => 'image_file',
-          'std'       => '',
-          'type'      => 'image',
-      ),
+      // array(
+      //     'name'      => 'Upload an image file',
+      //     'desc'      => 'Upload an image file.',
+      //     'id'        => 'image_file',
+      //     'std'       => '',
+      //     'type'      => 'image',
+      // ),
       array(
           'name'      => 'ComboBox Test',
           'id'        => 'combotest',
@@ -168,8 +168,8 @@ $volume->customfields()->add(array(
     ),
 ));
 
-// filter terms to be displayed on Edit Post Page
-$volume->filterTerms('meta_mycourse', 'post_parent');
+// filter terms to be displayed on Edit Custom Post Page
+$volume->filterTerms('term_meta', 'post_parent', 'comic_book');
 
 // modify metabox on Edit Post Page ('radio' or 'select')
 $volume->modifyMetabox('radio', 'comic_book');

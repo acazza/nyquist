@@ -58,8 +58,11 @@ class SoundlushTaxonomy
      */
     public $columns;
 
-    public $filter_metakey;
-    public $filter_metavalue;
+
+
+    public $metakey;
+    public $metavalue;
+
 
 
     /**
@@ -389,50 +392,74 @@ class SoundlushTaxonomy
         }
     }
 
+
+
     /**
     *  Filter Terms
     *  Filters the terms to be displayed based on Term Metadata.
     *  @param string $metakey
-    *  @param mixed $metavalue
+    *  @param mixed  $metavalue
     */
-    function filterTerms( $metakey, $metavalue)
+    function filterTerms( $metakey, $metavalue, $posttype)
     {
-      $this->metakey = $metakey;
-      //$this->metavalue = 247;
+
+        // filter for selects
+        add_filter( 'wp_terms_dropdown_args', function( $args ) use( $metakey, $metavalue, $posttype )
+        {
+          globa; $post;
+
+
+
+
+          return $args;
+
+        });
+
+        // filter for checkboxes and radio
+        add_filter( 'wp_terms_checklist_args', function( $args ) use( $metakey, $metavalue, $posttype )
+        {
+            global $post;
+
+            // check for posttype and add get_terms filter
+            if( get_post_type() == $posttype )
+            {
+                $this->metakey   = $metakey;
+                $this->metavalue = $post->post_parent;
+                add_filter( 'get_terms', [&$this, 'get_filtered_terms'], 10, 4 );
+            }
+
+            // don't affect wp_terms_checklist $args
+            return $args;
+        });
     }
 
-    // function switch_terms_filter( $_set = NULL )
-    // {
-    //   static $set;
-    //   if( ! is_null($_set) ) $set = $_set;
-    //   return $set;
-    // }
 
 
-    function your_filter_callback( $terms, $taxonomies, $args, $term_query )
+    /**
+    *  Get Filtered Terms
+    *  Change get_terms query args inside wp_terms_checklist Callback Function.
+    *  @param object  $terms
+    *  @param array   $taxonomies
+    *  @param array   $args
+    *  @param object  $query
+    *  @return object $terms
+    */
+    function get_filtered_terms( $terms, $taxonomies, $args, $term_query )
     {
         // remove filter after 1st run
         remove_filter( current_filter(), __FUNCTION__, 10, 4 );
 
-        // is the switch ON? If not do nothing.
-        // if( $this->switch_terms_filter() !== 1 ) {
-        //   //return $terms;
-        // };
-
-        //$this->switch_terms_filter(0); // turn the switch OFF
-
-        //$args['include'] =  array(47, 48);
         $args['meta_query'] = array(
             array(
-              'key'     => 'term_meta',
+              'key'     => $this->metakey,
               'value'   =>  sprintf(':"%s";', $this->metavalue),
               'compare' => 'LIKE',
             )
         );
-
         $terms = $term_query->query( $args );
         return $terms;
     }
+
 
 
     /**
@@ -464,19 +491,6 @@ class SoundlushTaxonomy
     */
     public function add_taxonomy_metabox( $post, $data )
     {
-
-        $this->metavalue = $post->post_parent;
-
-        add_filter( 'wp_terms_checklist_args', function( $args )
-        {
-            // turn the switch ON
-            //$this->switch_terms_filter(1);
-            // add get_terms filter
-            add_filter( 'get_terms', [&$this, 'your_filter_callback'], 10, 4 );
-            // we don't want to affect wp_terms_checklist $args
-            return $args;
-        });
-
         // set name of the form
         $name      = 'tax_input[' . $this->name . ']';
 
@@ -484,7 +498,6 @@ class SoundlushTaxonomy
         $postterms = get_the_terms( $post->ID, $this->name );
         $current   = ($postterms ? array_pop($postterms) : false);
         $current   = ($current ? $current->term_id : 0);
-
 
         // get input type
         $type = $data['args'];
@@ -517,12 +530,10 @@ class SoundlushTaxonomy
             <div id="taxonomy-<?php echo $this->name; ?>" class="categorydiv">
               <div id="<?php echo $this->name; ?>-all" class="tabs-panel">
                   <?php
-                  // filtered included terms
+                  //filtered included terms
                   $included_terms = get_terms(
                       array(
                           'taxonomy'   => $this->name,
-                          'orderby'    => 'slug',
-                          'order'      => 'ASC',
                           'hide_empty' => '0',
                           'fields'     => 'ids',
                           'meta_query' => array(

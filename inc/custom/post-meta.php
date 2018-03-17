@@ -72,6 +72,7 @@ class SoundlushPostMeta
 
     // get the saved meta as an array
     $postmeta = get_post_meta( $post->ID, 'static_fields', false );
+    $filemeta = get_post_meta( $post->ID, 'attach_fields', false );
 
     echo '<table class="form-table">';
 
@@ -88,7 +89,7 @@ class SoundlushPostMeta
 
       // check if there is saved metadata for the field, if not use default value
       $meta        = isset( $postmeta[0][ $field['id'] ] ) ? $postmeta[0][ $field['id'] ] : $standard ;
-
+      $file        = isset( $filemeta[0][ $field['id'] ] ) ? $filemeta[0][ $field['id'] ] : $standard ;
 
       switch ( $type )
       {
@@ -113,7 +114,7 @@ class SoundlushPostMeta
 
         case 'image':
 
-            $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta  . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
+            $html = '<tr><th scope="row"><label for="attach_fields_' . $id . '">' . $name . ': </label></th><td><label>'. $file . '</label><input type="file" class="widefat" name="attach_fields_' . $id . '" id="attach_fields_' . $id . '" value="' . $file  . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" multiple="false"/>' . $description . '</td></tr>';
             break;
 
         case 'textarea':
@@ -243,8 +244,10 @@ class SoundlushPostMeta
 
       //get the saved meta as an array
       $postmeta = get_post_meta( $post->ID, 'dynamic_fields', false );
-      $postmeta2 = get_post_meta( $post->ID, 'dynamic_attach', false );
-      var_dump($postmeta2);
+      //var_dump($postmeta);
+
+      //$postmeta2 = get_post_meta( $post->ID, 'dynamic_attach', false );
+      //var_dump($postmeta2);
 
       $c = 0;
       $output = '';
@@ -467,6 +470,21 @@ class SoundlushPostMeta
       // check permissions
       if('page' == $_POST['custom_post_type_nonce'] && ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  )  ) ) return;
 
+
+      // upload and saves media files
+      if( isset( $_FILES['attach_fields_meta_mycustom'] ))
+      {
+        $upload = wp_upload_bits( $_FILES['attach_fields_meta_mycustom']['name'], null, @file_get_contents( $_FILES['attach_fields_meta_mycustom']['tmp_name'] ) );
+
+        if( isset( $upload['error'] ) && $upload['error'] != 0 )
+        {
+            wp_die('There was an error uploading your file. The error is: ' . $upload['error']);
+        } else
+        {
+            update_post_meta( $post->ID, 'attach_fields_meta_mycustom', $_FILES['attach_fields_meta_mycustom'] );
+        }
+      }
+
       // save custom fields
       if( isset( $_POST ) && isset( $post->ID ) && get_post_type( $post->ID ) == $posttype_name )
       {
@@ -475,24 +493,41 @@ class SoundlushPostMeta
           update_post_meta( $post->ID, 'dynamic_fields', $_POST['dynamic_fields']);
       }
 
+      // if( isset( $_FILES['attach_fields'] )){
+      //
+      //   wp_upload_bits( $_FILES['attach_fields']['name'], null, file_get_contents( $_FILES['attach_fields']['tmp_name'] ) );
+      //
+      //   // $attachment_id = media_handle_upload( 'attach_fields', $post->ID, $_POST['attach_fields'] );
+      //   //
+      //   // if ( is_wp_error( $attachment_id ) ) {
+      //   //     // There was an error uploading the image.
+      //   //     echo "<script type='text/javascript'>alert('$attachment_id');</script>";
+      //   // } else {
+      //   //     // The image was uploaded successfully!
+      //   //     echo "<script type='text/javascript'>alert('$attachment_id');</script>";
+      //   // }
+      // }
+
+
+
+
       // make sure the file array isn't empty
-      if( ! empty( $_FILES['dynamic_attach'] ) )
-      {
-        //$arr_file_type = wp_check_filetype( basename( $_FILES['dynamic_attach'] ) );
-
-        // use the WordPress API to upload the file
-        $upload[] = wp_upload_bits( $_FILES['dynamic_attach'], null, file_get_contents( $_FILES['dynamic_attach'] ) );
-
-        if( ( isset( $upload['error'] ) && $upload['error'] != 0 ) )
-        {
-            wp_die( 'There was an error uploading your file. The error is: ' . $upload['error'] );
-        }
-        else
-        {
-            update_post_meta( $post->ID, 'dynamic_attach', $upload );
-        }
-
-      }
+      // if( ! empty( $_FILES['dynamic_attach'] ) )
+      // {
+      //   //$arr_file_type = wp_check_filetype( basename( $_FILES['dynamic_attach'] ) );
+      //
+      //   // use the WordPress API to upload the file
+      //   $upload[] = wp_upload_bits( $_FILES['dynamic_attach'], null, file_get_contents( $_FILES['dynamic_attach'] ) );
+      //
+      //   if( ( isset( $upload['error'] ) && $upload['error'] != 0 ) )
+      //   {
+      //       wp_die( 'There was an error uploading your file. The error is: ' . $upload['error'] );
+      //   }
+      //   else
+      //   {
+      //       update_post_meta( $post->ID, 'dynamic_attach', $upload );
+      //   }
+      //}
   }
 
 

@@ -22,8 +22,7 @@ require get_template_directory() . '/inc/custom/admin.php';
 require get_template_directory() . '/inc/custom/custom.php';
 require get_template_directory() . '/inc/custom/icon-functions.php';
 require get_template_directory() . '/inc/custom/helpers.php';
-require get_template_directory() . '/inc/custom/walker-radio-taxonomy.php'; // um ou outro...
-require get_template_directory() . '/inc/custom/walker-taxonomy-radio.php';
+require get_template_directory() . '/inc/custom/walker-radio-taxonomy.php';
 require get_template_directory() . '/inc/custom/columns.php';
 require get_template_directory() . '/inc/custom/post-meta.php';
 require get_template_directory() . '/inc/custom/taxonomy-meta.php';
