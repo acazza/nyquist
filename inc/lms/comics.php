@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Create a Anthology Post Type
+ */
+
+
 $options = array(
     'hierarchical' => true,
     'supports'     => array( 'title', 'editor', 'author','thumbnail', 'excerpt', 'page-attributes' )
@@ -11,13 +16,17 @@ $anthology->register();
 
 
 
+/**
+ * Create a Comic Book Post Type
+ */
+
 $options = array(
     'hierarchical' => true,
     'rewrite'      => array( 'slug'=> 'anthology' ), // set parent slug
     'supports'     => array( 'title', 'editor', 'author','thumbnail', 'excerpt', 'page-attributes' )
 );
 
-// create a Comic Book Post Type
+
 $comics = new SoundlushPostType('comic_book', $options);
 
 $comics->setAsParent('anthology');
@@ -61,17 +70,17 @@ $comics->customfields()->add( array(
   'title'     => __( 'MyMetabox 3' ),
   'fields'    => array(
     array(
-        'name'      => 'mycustom_3',
+        'name'      => 'My Custom 3',
         'desc'      => 'This is my second custom field.',
-        'id'        => 'meta_mycustom_3',
+        'id'        => '_soundlush_mycustom_3',
         'std'       => 'Default value here.',
         'type'      => 'text',
         'required'  => false
     ),
     array(
-        'name'      => 'mycustom_4',
+        'name'      => 'My Custom 4',
         'desc'      => 'This is my forth custom field.',
-        'id'        => 'meta_mycustom_4',
+        'id'        => '_soundlush_mycustom_4',
         'type'      => 'relation',
         'posttype'  => 'comic_book'
     )
@@ -83,59 +92,55 @@ $comics->customfields()->add(array(
   'title'     => __( 'MyMetabox' ),
   'fields'    => array(
     array(
-        'name'      => 'mycustom',
+        'name'      => 'My Custom',
         'desc'      => 'This is my file custom field.',
-        'id'        => 'meta_mycustom',
+        'id'        => '_soundlush_mycustom',
         'std'       => 'No saved image.',
-        'type'      => 'image',
+        'type'      => 'file',
+        'accept'    => '.jpg, .jpeg, .png, .gif, .mp3, .wav, .ogg',
         'required'  => false
     )),
 ));
 
-$comics->customfields()->addRepeater(array(
+//$comics->customfields()->addRepeater(array(
+$comics->customfields()->add(array(
     'id'        => 'encyclopedia_info',
     'title'     => __( 'Enciclopedia Info' ),
     'fields'    => array(
-      // array(
-      //     'name'      => 'Upload an image file',
-      //     'desc'      => 'Upload an image file.',
-      //     'id'        => 'image_file',
-      //     'std'       => '',
-      //     'type'      => 'image',
-      // ),
       array(
           'name'      => 'ComboBox Test',
-          'id'        => 'combotest',
+          'id'        => '_soundlush_combotest',
           'type'      => 'select',
           'options'   => array(
             array(
               'label' => 'Combo 1',
-              'value' => 'combo1'
+              'value' => '_soundlush_combo1'
             ),
             array(
               'label' => 'Combo 2',
-              'value' => 'combo2'
+              'value' => '_soundlush_combo2'
             )
           )
       ),
       array(
           'name'      => 'RadioTest',
-          'id'        => 'radiotest',
+          'id'        => '_soundlush_radiotest',
           'type'      => 'radio',
           'options'   => array(
             array(
               'label' => 'Radio 1',
-              'value' => 'radio1'
+              'value' => '_soundlush_radio1'
             ),
             array(
               'label' => 'Radio 2',
-              'value' => 'radio2'
+              'value' => '_soundlush_radio2'
             )
           )
       ),
     ),
     'context'   => 'normal',
     'priority'  => 'default',
+    'repeater'  => true,
   )
 );
 
@@ -144,7 +149,12 @@ $comics->register();
 
 
 
-// create the genre Taxonomy
+/**
+ * Create a Volume Taxonomy
+ */
+
+
+// create the volume Taxonomy
 $volume = new SoundlushTaxonomy('volume');
 
 // set custom fields for Volumes

@@ -13,11 +13,17 @@ class SoundlushPostMeta
 
 
 
+  /**
+   * List of custom fields
+   * @var array
+   */
+  public $allfields;
+
+
 
   public function __construct($posttype_name){
     $this->posttype_name = $posttype_name;
   }
-
 
 
 
@@ -34,18 +40,24 @@ class SoundlushPostMeta
       // metabox variables
       $box_id         = SoundlushHelpers::uglify( $metabox['id'] );
       $box_title      = SoundlushHelpers::beautify( $metabox['title'] );
-      $box_context    = isset( $metabox['context'] ) ? $metabox['context']  : 'normal';
-      $box_priority   = isset( $metabox['priority']) ? $metabox['priority'] : 'default';
+      $box_context    = isset( $metabox['context'] )  ? $metabox['context']  : 'normal';
+      $box_priority   = isset( $metabox['priority'] ) ? $metabox['priority'] : 'default';
       $fields         = $metabox['fields'];
+      $repeater       = ( isset( $metabox['repeater'] ) && $metabox['repeater'] == true ) ? true : false;
 
+
+      // update global list of fields
+      foreach( $fields as $field ){
+        $this->allfields[] = $field;
+      }
 
       // register metabox
-      add_action( 'add_meta_boxes', function() use( $box_id, $box_title, $box_context, $box_priority, $fields )
+      add_action( 'add_meta_boxes', function() use( $box_id, $box_title, $box_context, $box_priority, $fields, $repeater )
       {
         add_meta_box(
           $box_id,
           $box_title,
-          array( &$this, 'displayMetabox' ),
+          ( $repeater ) ? array( &$this, 'displayRepeaterMetabox' ) : array( &$this, 'displayMetabox' ) ,
           $this->posttype_name,
           $box_context,
           $box_priority,
@@ -70,9 +82,6 @@ class SoundlushPostMeta
     // create nonce field
     wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' );
 
-    // get the saved meta as an array
-    $postmeta = get_post_meta( $post->ID, 'static_fields', false );
-    $filemeta = get_post_meta( $post->ID, 'attach_fields', false );
 
     echo '<table class="form-table">';
 
@@ -87,15 +96,17 @@ class SoundlushPostMeta
       $description = isset( $field['desc'] ) ? '<span class="description">' . $field['desc'] . '</span>' : '';
       $standard    = isset( $field['std'] ) ? $field['std'] : '';
 
+
       // check if there is saved metadata for the field, if not use default value
-      $meta        = isset( $postmeta[0][ $field['id'] ] ) ? $postmeta[0][ $field['id'] ] : $standard ;
-      $file        = isset( $filemeta[0][ $field['id'] ] ) ? $filemeta[0][ $field['id'] ] : $standard ;
+      $postmeta = get_post_meta( $post->ID, $id, true );
+      $meta     = !empty( $postmeta ) ? $postmeta : $standard;
+
 
       switch ( $type )
       {
         case 'text':
 
-            $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
+            $html = '<tr><th scope="row"><label for="' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="' . $id . '" id="' . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
             break;
 
         case 'number':
@@ -104,53 +115,66 @@ class SoundlushPostMeta
             $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
             $step = isset( $field['step'] ) ? ' step="' . $field['step'] . '" ' : '';
 
-            $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="number" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
+            $html = '<tr><th scope="row"><label for="' . $id . '">' . $name . ': </label></th><td><input type="number" name="' . $id . '" id="' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
             break;
 
-        case 'audio':
+        case 'file':
 
-            $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" value="' . $meta  . '"' . $required . 'accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
-            break;
+            $upload_dir    = wp_upload_dir();
+            $upload_subdir = trailingslashit( $upload_dir['baseurl'] ) . 'soundlush_uploads/postmeta';
 
-        case 'image':
+            $accept = ' accept="' . $field['accept'] . '"';
+            $preview = '';
 
-            $html = '<tr><th scope="row"><label for="attach_fields_' . $id . '">' . $name . ': </label></th><td><label>'. $file . '</label><input type="file" class="widefat" name="attach_fields_' . $id . '" id="attach_fields_' . $id . '" value="' . $file  . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" multiple="false"/>' . $description . '</td></tr>';
+            if ( strpos( $meta['type'], 'image') !== false)
+              $preview = '<img src="'. trailingslashit( $upload_subdir ) . $meta['name'] . '" width="150" height="150" >';
+            if ( strpos( $meta['type'], 'audio') !== false)
+              $preview = '<audio controls> <source src="'. trailingslashit( $upload_subdir ) . $meta['name'] . '" type="'.$meta['type'].' ">Your browser does not support the audio element.</audio>';
+
+
+            $html = '<tr><th scope="row"><label for="' . $id . '">' . $name . ': </label></th><td>' . $preview . '<p>' . $meta['name'] . '</p><input type="file" class="widefat" name="' . $id . '" id="' . $id . '" value="' . $meta['name']  . '"' . $required . $accept . ' multiple="false"/>' . $description . '</td></tr>';
             break;
 
         case 'textarea':
 
-            $html = '<tr><th scope="row"><label for="static_fields_' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="static_fields[' . $id . ']" id="static_fields_' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
+            $html = '<tr><th scope="row"><label for="' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="' . $id . '" id="' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
             break;
 
         case 'editor':
 
-            $settings = array( //TODO all fields here
-              'wpautop'       => false,
-              'media_buttons' => false,
-              'textarea_name' => 'static_fields[' . $id . ']',
+            $settings = array(
+              'wpautop'          => false,
+              'media_buttons'    => false,
+              'textarea_name'    => $id,
+              'textarea_rows'    =>  get_option('default_post_edit_rows', 10),
+              'tabindex'         => '',
+              'editor_css'       => '',
+              'editor_class'     => '',
+              'editor_height'    => '',
+              'teeny'            => false,
+              'dfw'              => false,
+              'tinymce'          => true,
+              'quicktags'        => true,
+              'drag_drop_upload' => false
             );
-            $editor_id = 'static_fields_' . $id;
 
-            //create buffer & echo the editor to the buffer
-            ob_start();
-            wp_editor( htmlspecialchars_decode( $meta ), $editor_id, $settings );
+            ob_start(); //create buffer & echo the editor to the buffer
+            wp_editor( htmlspecialchars_decode( $meta ), $id, $settings );
 
-            $html = '<tr><th scope="row"><label for="' . $editor_id . '">' . $name . ': </label></th><td>';
-
-            //store the contents of the buffer in the variable
-            $html .= ob_get_clean();
+            $html = '<tr><th scope="row"><label for="' . $id . '">' . $name . ': </label></th><td>';
+            $html .= ob_get_clean(); //store the contents of the buffer in the variable
             $html .= $description .'</td></tr>';
             break;
 
         case 'checkbox':
 
             //WHat to write here!!! fieldset ???
-            $html = '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="static_fields[' . $id . ']" id="static_fields_' . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="static_fields_' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
+            $html = '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="' . $id . '" id="' . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
             break;
 
         case 'select':
 
-            $html = '<tr><th scope="row"><label for="static_fields_' . $id . '" >' . $name . ': </label></th><td><select name="static_fields[' . $id . ']" id="static_fields_' . $id . '" >';
+            $html = '<tr><th scope="row"><label for="' . $id . '" >' . $name . ': </label></th><td><select name="' . $id . '" id="' . $id . '" >';
             foreach ( $field['options'] as $option ) {
               $html .= '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
             }
@@ -161,7 +185,7 @@ class SoundlushPostMeta
 
             $html = '<tr><th scope="row"><label>' . $name . ': </label></th><td><ul>';
             foreach ( $field['options'] as $option ) {
-              $html .= '<li><input type="radio" name="static_fields[' . $id . ']" id="static_fields_' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="static_fields_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+              $html .= '<li><input type="radio" name="' . $id . '" id="' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="' . $option['value'] . '">' . $option['label'] . '</label></li>';
             }
             $html .= '</ul>' . $description . '</td></tr>';
             break;
@@ -172,7 +196,7 @@ class SoundlushPostMeta
 
             $items = query_posts(array('post_type' => $posttype) );
 
-            $html = '<tr><th scope="row"><label for="static_fields_' . $id . '" >' . $name . ': </label></th><td><select name="static_fields[' . $id . ']" id="static_fields_' . $id . '" >';
+            $html = '<tr><th scope="row"><label for="' . $id . '" >' . $name . ': </label></th><td><select name="' . $id . '" id="' . $id . '" >';
             foreach ( $items as $item ) {
               $html .= '<option value="' . $item->ID . '" ' . ( $meta == $item->ID ? '" selected="selected"' : '' ) . '>' . $item->post_title . '</option>';
             }
@@ -185,7 +209,11 @@ class SoundlushPostMeta
 
       echo $html;
     }
+
     echo '</table>';
+
+    //var_dump($this->allfields);
+
   }
 
 
@@ -195,33 +223,33 @@ class SoundlushPostMeta
   *  Register repeater custom field metabox for Posttype.
   *  @param array  $metabox
   */
-  public function addRepeater( $metabox )
-  {
-      // test if there are metabox arguments
-      if( empty( $metabox ) ) return;
-
-      // metabox variables
-      $box_id         = SoundlushHelpers::uglify( $metabox['id'] );
-      $box_title      = SoundlushHelpers::beautify( $metabox['title'] );
-      $box_context    = isset( $metabox['context'] ) ? $metabox['context']  : 'normal';
-      $box_priority   = isset( $metabox['priority']) ? $metabox['priority'] : 'default';
-      $fields         = $metabox['fields'];
-
-
-      // register metabox
-      add_action( 'add_meta_boxes', function() use( $box_id, $box_title, $box_context, $box_priority, $fields )
-      {
-        add_meta_box(
-          $box_id,
-          $box_title,
-          array( &$this, 'displayRepeaterMetabox' ),
-          $this->posttype_name,
-          $box_context,
-          $box_priority,
-          $fields
-        );
-      }, 10, 1 );
-  }
+  // public function addRepeater( $metabox )
+  // {
+  //     // test if there are metabox arguments
+  //     if( empty( $metabox ) ) return;
+  //
+  //     // metabox variables
+  //     $box_id         = SoundlushHelpers::uglify( $metabox['id'] );
+  //     $box_title      = SoundlushHelpers::beautify( $metabox['title'] );
+  //     $box_context    = isset( $metabox['context'] ) ? $metabox['context']  : 'normal';
+  //     $box_priority   = isset( $metabox['priority']) ? $metabox['priority'] : 'default';
+  //     $fields         = $metabox['fields'];
+  //
+  //
+  //     // register metabox
+  //     add_action( 'add_meta_boxes', function() use( $box_id, $box_title, $box_context, $box_priority, $fields )
+  //     {
+  //       add_meta_box(
+  //         $box_id,
+  //         $box_title,
+  //         array( &$this, 'displayRepeaterMetabox' ),
+  //         $this->posttype_name,
+  //         $box_context,
+  //         $box_priority,
+  //         $fields
+  //       );
+  //     }, 10, 1 );
+  // }
 
 
 
@@ -244,10 +272,6 @@ class SoundlushPostMeta
 
       //get the saved meta as an array
       $postmeta = get_post_meta( $post->ID, 'dynamic_fields', false );
-      //var_dump($postmeta);
-
-      //$postmeta2 = get_post_meta( $post->ID, 'dynamic_attach', false );
-      //var_dump($postmeta2);
 
       $c = 0;
       $output = '';
@@ -273,6 +297,7 @@ class SoundlushPostMeta
                 $required    = ( isset( $field['required'] ) && $field['required'] ) ? ' required' : '';
                 $description = isset( $field['desc'] ) ? '<span class="description">' . $field['desc'] . '</span>' : '';
                 $standard    = isset( $field['std'] ) ? $field['std'] : '';
+
                 //check if there is saved metadata for the field, if not use default value
                 $meta        = isset( $answer[ $field['id'] ] ) ? $answer[ $field['id'] ] : $standard ;
 
@@ -280,7 +305,7 @@ class SoundlushPostMeta
                 {
                   case 'text':
 
-                    echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
+                    echo '<tr><th scope="row"><label for="_repeater_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
                     break;
 
                   case 'number':
@@ -289,35 +314,35 @@ class SoundlushPostMeta
                     $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
                     $step = isset( $field['step'] ) ? ' step="' . $field['step'] . '" ' : '';
 
-                    echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="number" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
+                    echo '<tr><th scope="row"><label for="_repeater_' . $c .$id . '">' . $name . ': </label></th><td><input type="number" name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $id . '" value="' . $meta . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
                     break;
 
                   case 'audio':
 
-                    echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta  . '"' . $required . ' accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
+                    echo '<tr><th scope="row"><label for="_repeater_' . $c . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $id . '" value="' . $meta  . '"' . $required . ' accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
                     break;
 
                   case 'image':
 
                     // echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><img href="' . $meta . '"/><input type="file" class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" value="' . $meta  . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
 
-                    echo '<tr><th scope="row"><label for="dynamic_attach_' . $c . '_' . $id . '">' . $name . ': </label></th><td>' .  $meta . '<input type="file" class="widefat" name="dynamic_attach[' . $c . '][' . $id . ']" id="dynamic_attach_' . $c . '_' . $id . '" value="' . $meta  . '"' . $required . ' accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
+                    echo '<tr><th scope="row"><label for="_repeater_' . $c . $id . '">' . $name . ': </label></th><td>' .  $meta . '<input type="file" class="widefat" name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $id . '" value="' . $meta  . '"' . $required . ' accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
                     break;
 
                   case 'textarea':
 
-                    echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
+                    echo '<tr><th scope="row"><label for="_repeater_' . $c . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
                     break;
 
 
                   case 'checkbox':
 
-                    echo '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="dynamic_fields_' . $c . '_' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
+                    echo '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="_repeater_' . $c . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
                     break;
 
                   case 'select':
 
-                    echo '<tr><th scope="row"><label for="dynamic_fields_' . $c . '_' . $id . '" >' . $name . ': </label></th><td><select name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $id . '" >';
+                    echo '<tr><th scope="row"><label for="_repeater_' . $c . $id . '" >' . $name . ': </label></th><td><select name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $id . '" >';
                     foreach ( $field['options'] as $option ) {
                       echo '<option value="' . $option['value'] . '" ' . ( $meta == $option['value'] ? '" selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
                     }
@@ -328,7 +353,7 @@ class SoundlushPostMeta
 
                     echo '<tr><th scope="row"><label>' . $name . ': </label></th><td><ul>';
                     foreach ( $field['options'] as $option ) {
-                      echo '<li><input type="radio" name="dynamic_fields[' . $c . '][' . $id . ']" id="dynamic_fields_' . $c . '_' . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="dynamic_fields_' . $c . '_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+                      echo '<li><input type="radio" name="_repeater_' . $c . $id . '" id="_repeater_' . $c . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="_repeater_' . $c . $option['value'] . '">' . $option['label'] . '</label></li>';
                     }
                     echo '</ul>' . $description . '</td></tr>';
                     break;
@@ -361,7 +386,7 @@ class SoundlushPostMeta
           {
             case 'text':
 
-              $output .=  '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . ' />' . $description . '</td></tr>';
+              $output .=  '<tr><th scope="row"><label for="_repeater_count_variable' . $id . '">' . $name . ': </label></th><td><input type="text" class="widefat" name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $id . '"' . $required . ' />' . $description . '</td></tr>';
               break;
 
             case 'number':
@@ -370,32 +395,32 @@ class SoundlushPostMeta
               $max  = isset( $field['max'] ) ? ' max="' . $field['max'] . '" ' : '';
               $step = isset( $field['step'] ) ? ' step="' . $field['step'] . '" ' : '';
 
-              $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="number" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
+              $output .= '<tr><th scope="row"><label for="_repeater_count_variable' . $id . '">' . $name . ': </label></th><td><input type="number" name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $id . '"' . $required . $min . $max . $step . ' /></br>' . $description . '</td></tr>';
               break;
 
             case 'audio':
 
-              $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '"' . $required . 'accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
+              $output .= '<tr><th scope="row"><label for="_repeater_count_variable' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $id . '"' . $required . 'accept=".mp3, .wav, .ogg" />' . $description . '</td></tr>';
               break;
 
             case 'image':
 
-              $output .= '<tr><th scope="row"><label for="dynamic_attach_count_variable_' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="dynamic_attach[count_variable][' . $id . ']" id="dynamic_attach_count_variable_' . $id . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
+              $output .= '<tr><th scope="row"><label for="_repeater_count_variable' . $id . '">' . $name . ': </label></th><td><input type="file" class="widefat" name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $id . '"' . $required . 'accept=".jpg, .jpeg, .png, .gif" />' . $description . '</td></tr>';
               break;
 
             case 'textarea':
 
-              $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' ></textarea>'. $description . '</td></tr>';
+              $output .= '<tr><th scope="row"><label for="_repeater_count_variable' . $id . '">' . $name . ': </label></th><td><textarea class="widefat" name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' ></textarea>'. $description . '</td></tr>';
               break;
 
             case 'checkbox':
 
-              $output .= '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '" /><label for="dynamic_fields_count_variable_' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
+              $output .= '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $id . '" /><label for="_repeater_count_variable' . $id . '">' . $name . ' </label></br>' . $description . '</td></tr>';
               break;
 
             case 'select':
 
-              $output .= '<tr><th scope="row"><label for="dynamic_fields_count_variable_' . $id . '" >' . $name . ': </label></th><td><select name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $id . '" >';
+              $output .= '<tr><th scope="row"><label for="_repeater_count_variable' . $id . '" >' . $name . ': </label></th><td><select name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $id . '" >';
               foreach ( $field['options'] as $option ) {
                 $output .= '<option value="' . $option['value'] . '">' . $option['label'] . '</option>';
               }
@@ -406,7 +431,7 @@ class SoundlushPostMeta
 
               $output .= '<tr><th scope="row"><label>' . $name . ': </label></th><td><ul>';
               foreach ( $field['options'] as $option ) {
-                $output .= '<li><input type="radio" name="dynamic_fields[count_variable][' . $id . ']" id="dynamic_fields_count_variable_' . $option['value'] . '" value="' . $option['value'] . '"' . $required . '/><label for="dynamic_fields_count_variable_' . $option['value'] . '">' . $option['label'] . '</label></li>';
+                $output .= '<li><input type="radio" name="_repeater_count_variable' . $id . '" id="_repeater_count_variable' . $option['value'] . '" value="' . $option['value'] . '"' . $required . '/><label for="_repeater_count_variable' . $option['value'] . '">' . $option['label'] . '</label></li>';
               }
               $output .= '</ul>' . $description . '</td></tr>';
               break;
@@ -425,17 +450,19 @@ class SoundlushPostMeta
             var count = <?php echo $c; ?>;
             var output = '<?php echo $output; ?>';
 
+
             $( ".add" ).click( function()
             {
                 count = count + 1;
-                //substitute placeholder index by the count variable
+
+                //substitute placeholder by the count variable
                 var res = output.replace(/count_variable/g, count);
 
                 $('#here').append( '<div class="repeater"><table class="form-table">' + res + '</table><button class="remove button-secondary">Remove Answer</button></div>' );
 
                 return false;
-            //}
             });
+
 
             $( ".remove" ).live( 'click', function() {
                 $( this ).parent().remove();
@@ -459,7 +486,7 @@ class SoundlushPostMeta
   {
       global $post;
 
-      //$fields = $this->fields;
+      $fields = $this->allfields;
 
       // deny WordPress autosave function
       if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
@@ -471,65 +498,94 @@ class SoundlushPostMeta
       if('page' == $_POST['custom_post_type_nonce'] && ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  )  ) ) return;
 
 
-      // upload and saves media files
-      if( isset( $_FILES['attach_fields_meta_mycustom'] ))
-      {
-        $upload = wp_upload_bits( $_FILES['attach_fields_meta_mycustom']['name'], null, @file_get_contents( $_FILES['attach_fields_meta_mycustom']['tmp_name'] ) );
-
-        if( isset( $upload['error'] ) && $upload['error'] != 0 )
-        {
-            wp_die('There was an error uploading your file. The error is: ' . $upload['error']);
-        } else
-        {
-            update_post_meta( $post->ID, 'attach_fields_meta_mycustom', $_FILES['attach_fields_meta_mycustom'] );
-        }
-      }
-
       // save custom fields
       if( isset( $_POST ) && isset( $post->ID ) && get_post_type( $post->ID ) == $posttype_name )
       {
-          // TODO sanitize inputs
-          update_post_meta( $post->ID, 'static_fields', $_POST['static_fields']);
-          update_post_meta( $post->ID, 'dynamic_fields', $_POST['dynamic_fields']);
+        if( $fields  && ! empty( $fields ) )
+        {
+          foreach( $fields as $field )
+          {
+            // non-upload fields
+            if( isset( $_POST[$field['id']]) )
+            {
+                // sanitize fields
+                switch( $field['type'] )
+                {
+                  case 'editor':
+                    $new = htmlspecialchars( $_POST[ $field['id'] ] );
+                    break;
+
+                  case 'text':
+                    $new = sanitize_text_field( $_POST[ $field['id'] ] );
+                    break;
+
+                  case 'textarea':
+                    $new = sanitize_textarea_field( $_POST[ $field['id'] ] );
+                    break;
+
+                  default:
+                    $new = $_POST[ $field['id'] ];
+                    break;
+                }
+                update_post_meta( $post->ID, $field['id'],  $new );
+            }
+
+
+            // upload fields
+            // if( isset( $_FILES[$field['id']] ))
+            // {
+            //
+            //   // sanitize file name
+            //   $_FILES[ $field['id'] ]['name'] = sanitize_file_name( $_FILES[ $field['id'] ]['name'] );
+            //
+            //
+            //  $upload = wp_upload_bits( $_FILES[ $field['id'] ]['name'], null, @file_get_contents( $_FILES[ $field['id'] ]['tmp_name'] ) );
+             // if( isset( $upload['error'] ) && $upload['error'] != 0 )
+             // {
+             //    wp_die('There was an error uploading your file. The error is: ' . $upload['error']);
+             // } else {
+             //   update_post_meta( $post->ID, $field['id'], $_FILES[$field['id']] );
+             // }
+            // }
+
+
+            // check if we are trying to uploaded a file
+            if (!empty($_FILES[ $field['id'] ]) && $_FILES[ $field['id'] ]['error'] == UPLOAD_ERR_OK)
+            {
+                // create custom upload dir
+                $upload_dir    = wp_upload_dir();
+                $upload_subdir = trailingslashit( $upload_dir['basedir'] ) . 'soundlush_uploads/postmeta';
+                 wp_mkdir_p( $upload_subdir );
+
+                // make sure we're dealing with an upload
+                if (is_uploaded_file($_FILES[ $field['id'] ]['tmp_name']) === false){
+                    throw new \Exception('Error on upload: Invalid file definition');
+                }
+
+                // rename file
+                $uploadName = sanitize_file_name( $_FILES[ $field['id'] ]['name'] );
+                //$ext        = strtolower( substr( $uploadName, strripos( $uploadName, '.' ) +1 ) );
+                //$filename   = round( microtime( true ) ) . mt_rand() . '.' . $ext;
+
+                $filename   = round( microtime( true ) ) . '_' . $uploadName;
+                $_FILES[ $field['id'] ]['name'] = $filename;
+
+                // upload file
+                $source      = $_FILES[ $field['id']]['tmp_name'];
+                $destination = trailingslashit( $upload_subdir ).$filename;
+                $upload      = move_uploaded_file( $source, $destination);
+
+                // insert file meta into database
+                if($upload){
+                  update_post_meta( $post->ID, $field['id'], $_FILES[$field['id']] );
+                }
+            }
+
+          }
+        }
       }
 
-      // if( isset( $_FILES['attach_fields'] )){
-      //
-      //   wp_upload_bits( $_FILES['attach_fields']['name'], null, file_get_contents( $_FILES['attach_fields']['tmp_name'] ) );
-      //
-      //   // $attachment_id = media_handle_upload( 'attach_fields', $post->ID, $_POST['attach_fields'] );
-      //   //
-      //   // if ( is_wp_error( $attachment_id ) ) {
-      //   //     // There was an error uploading the image.
-      //   //     echo "<script type='text/javascript'>alert('$attachment_id');</script>";
-      //   // } else {
-      //   //     // The image was uploaded successfully!
-      //   //     echo "<script type='text/javascript'>alert('$attachment_id');</script>";
-      //   // }
-      // }
-
-
-
-
-      // make sure the file array isn't empty
-      // if( ! empty( $_FILES['dynamic_attach'] ) )
-      // {
-      //   //$arr_file_type = wp_check_filetype( basename( $_FILES['dynamic_attach'] ) );
-      //
-      //   // use the WordPress API to upload the file
-      //   $upload[] = wp_upload_bits( $_FILES['dynamic_attach'], null, file_get_contents( $_FILES['dynamic_attach'] ) );
-      //
-      //   if( ( isset( $upload['error'] ) && $upload['error'] != 0 ) )
-      //   {
-      //       wp_die( 'There was an error uploading your file. The error is: ' . $upload['error'] );
-      //   }
-      //   else
-      //   {
-      //       update_post_meta( $post->ID, 'dynamic_attach', $upload );
-      //   }
-      //}
   }
-
 
 }
 }
