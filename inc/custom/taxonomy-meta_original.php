@@ -81,6 +81,9 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
       // put the term ID into a variable
       $t_id = $term->term_id;
 
+      // retrieve the existing value(s) for this meta field. This returns an array
+      $term_meta = get_term_meta( $t_id, 'term_meta', false );
+
       foreach( $customfields as $customfield )
       {
         $wrapper  = 'tr';
@@ -88,9 +91,6 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
         $end_th   = '</th>';
         $start_td = '<td>';
         $end_td   = '</td>';
-
-        // retrieve the existing value for this meta field.
-        $term_meta = get_term_meta( $t_id, SoundlushHelpers::uglify( $customfield['id']), true );
 
         echo $this->create_html_markup($customfield, $wrapper, $term_meta, $start_th, $end_th, $start_td, $end_td  );
       }
@@ -114,7 +114,7 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
       $standard    = isset( $customfield['std'] ) ? $customfield['std'] : '';
 
       // check if there is saved metadata for the field, if not use default value
-      $meta        = isset( $term_meta )? $term_meta : $standard ;
+      $meta        = isset( $term_meta[0][ $id ] )? $term_meta[0][ $id ] : $standard ;
 
       $html        = '<'. $wrapper .' class="form-field">';
 
@@ -122,9 +122,9 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
       {
         case 'text':
             $html .= $start_th;
-            $html .= '<label for="' . $id . '">' . $name . '</label>';
+            $html .= '<label for="term_meta_' . $id . '">' . $name . '</label>';
             $html .= $end_th . $start_td;
-            $html .= '<input type="text" name="'. $id . '" id="'. $id . '" value="' . (isset( $meta ) ? esc_attr( $meta ) : '') . '">';
+            $html .= '<input type="text" name="term_meta['. $id . ']" id="term_meta_'. $id . '" value="' . (isset( $meta ) ? esc_attr( $meta ) : '') . '">';
             $html .= $description;
             $html .= $end_td;
             break;
@@ -134,9 +134,9 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
             $items = query_posts(array('post_type' => $posttype) );
 
             $html .= $start_th;
-            $html .= '<label for="' . $id . '">' . $name . '</label>';
+            $html .= '<label for="term_meta_' . $id . '">' . $name . '</label>';
             $html .= $end_th . $start_td;
-            $html .= '<select class="postform" name="'. $id . '" id="'. $id . '">';
+            $html .= '<select class="postform" name="term_meta['. $id . ']" id="term_meta_'. $id . '">';
             $html .= '<option value="0"' . ( $meta == 0 ? '" selected="selected"' : '' ) .  ' >Choose a(n) ' . SoundlushHelpers::beautify($posttype) . '</option>';
             foreach ( $items as $item ) {
               $html .= '<option value="' . $item->ID . '"' . ( $meta == $item->ID ? '" selected="selected"' : '' ) .  ' >' . $item->post_title . '</option>';
@@ -170,33 +170,34 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
         // get term id
         $t_id = $term_id;
 
-        // save custom fields
-        if( isset( $_POST ) && ! empty( $t_id ) )
+
+        if( isset( $_POST['term_meta'] ) && ! empty( $t_id ) )
         {
+          $term_meta = $_POST['term_meta'];
           $fields = $this->customfields;
 
-          if( $fields  && ! empty( $fields ) )
+          // sanitize fields
+          foreach( $fields as $field )
           {
-            // sanitize fields
-            foreach( $fields as $field )
-            {
-              if( isset( $_POST[$field['id']]) )
+              switch( $field['type'] )
               {
-                switch( $field['type'] )
-                {
-                  case 'text':
-                    $new = sanitize_text_field( $_POST[$field['id']] );
-                    break;
-                  default:
-                    $new = $_POST[$field['id']];
-                    break;
-                }
-                // save term metadata
-                update_term_meta($t_id, $field['id'], $new);
+                case 'text':
+                 $new = sanitize_text_field( $term_meta[ $field['id'] ] );
+                 $term_meta[ $field['id'] ] = $new;
+                  break;
+                default:
+                  break;
               }
-            }
+            //update_term_meta($t_id, $field['id'], 'orange');
           }
+          // save term metadata
+          update_term_meta( $t_id, 'term_meta', $term_meta );
+
+          //update_term_meta( $t_id, 'term_meta', $_POST['term_meta'] );
+
         }
+
+
     }
   }
 }

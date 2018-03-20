@@ -406,9 +406,9 @@ class SoundlushTaxonomy
         // filter for selects
         add_filter( 'wp_terms_dropdown_args', function( $args ) use( $metakey, $metavalue, $posttype )
         {
-          globa; $post;
+          global $post;
 
-
+          // ???? do not remember...
 
 
           return $args;
@@ -452,7 +452,7 @@ class SoundlushTaxonomy
         $args['meta_query'] = array(
             array(
               'key'     => $this->metakey,
-              'value'   =>  sprintf(':"%s";', $this->metavalue),
+              'value'   => $this->metavalue, // if array, sprintf(':"%s";', $this->metavalue),
               'compare' => 'LIKE',
             )
         );
@@ -538,8 +538,10 @@ class SoundlushTaxonomy
                           'fields'     => 'ids',
                           'meta_query' => array(
                               array(
-                                'key'     => 'term_meta',
-                                'value'   =>  sprintf(':"%s";', $this->metavalue),
+                                //'key'     => 'term_meta',
+                                //'value'   =>  sprintf(':"%s";', $this->metavalue),
+                                'key'     => $this->metakey,
+                                'value'   => $this->metavalue,
                                 'compare' => 'LIKE',
                           ))
                       )
