@@ -7,7 +7,7 @@
  * @package soundlush
  */
 
-if( !class_exists( 'SoundlushHelpers') )
+if( ! class_exists( 'SoundlushHelpers') )
 {
 
   class SoundlushHelpers

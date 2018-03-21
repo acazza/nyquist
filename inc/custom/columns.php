@@ -1,4 +1,7 @@
 <?php
+
+if( ! class_exists( 'SoundlushColumns' ) )
+{
 class SoundlushColumns
 {
     /**
@@ -173,4 +176,5 @@ class SoundlushColumns
         }
         return $columns;
     }
+}
 }

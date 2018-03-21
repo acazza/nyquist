@@ -1,6 +1,6 @@
 <?php
 
-if( !class_exists( 'SoundlushTaxonomy' ) )
+if( ! class_exists( 'SoundlushTaxonomy' ) )
 {
 class SoundlushTaxonomy
 {

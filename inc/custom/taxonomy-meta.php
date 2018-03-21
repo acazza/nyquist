@@ -103,53 +103,74 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
     *  Outputs html for each custom field.
     *  @param
     */
-    function create_html_markup( $customfield, $wrapper, $term_meta='', $start_th='', $end_th='', $start_td='', $end_td='' )
+    function create_html_markup( $args, $wrapper, $term_meta='', $start_th='', $end_th='', $start_td='', $end_td='' )
     {
 
+      $defaults = array(
+          'label'       => '',                                    // (string)   all
+          'type'        => 'text',                                // (string)   all
+          'desc'        => '',                                    // (string)   all
+          'std'         => '',                                    // (mixed)    all
+          'required'    => false,                                 // (boolean)  all BUT checkbox
+          'allow_tags'  => false,                                 // (boolean)  text & textarea
+          'min'         => 0,                                     // (int)      number
+          'max'         => 10,                                    // (int)      number
+          'step'        => 1,                                     // (int)      number
+          'posttype'    => '',                                    // (string)   relation
+          'options'     => '',                                    // (array)    select & radio
+          'accept'      => '.png, .jpg, .jpeg, .wav, .mp3, .ogg'  // (string)   file
+      );
+
+      $customfield = wp_parse_args( $args, $defaults );
+
+
+      $label       = !empty( $customfield['label'] ) ? $customfield['label'] : $customfield['id'];
+      $label       = SoundlushHelpers::beautify( $label );
       $id          = SoundlushHelpers::uglify( $customfield['id'] );
-      $name        = SoundlushHelpers::beautify( $customfield['name'] );
-      $type        = isset( $customfield['type'] ) ? $customfield['type'] : 'text';
-      $required    = ( isset( $customfield['required'] ) && $customfield['required'] ) ? ' required' : '';
-      $description = isset( $customfield['desc'] ) ? '<p class="description">' . $customfield['desc'] . '</p>' : '';
-      $standard    = isset( $customfield['std'] ) ? $customfield['std'] : '';
+      $name        = '_' . $id;
 
-      // check if there is saved metadata for the field, if not use default value
-      $meta        = isset( $term_meta )? $term_meta : $standard ;
+      $required    = $customfield['required'] ? ' required' : '';
+      $description = !empty( $customfield['desc'] ) ? '<p class="description">'.$customfield['desc'].'</p>' : '';
 
-      $html        = '<'. $wrapper .' class="form-field">';
+      // check if there is saved metadata for the field
+      // if not use default value
+      $meta        = isset( $term_meta )? $term_meta : $customfield['std'] ;
 
-      switch( $type )
+
+      $html = '<'. $wrapper .' class="form-field">';
+      $html.= $start_th;
+      $html.= '<label for="' . $id . '">' . $label . '</label>';
+      $html.= $end_th . $start_td;
+
+      switch( $customfield['type'] )
       {
         case 'text':
-            $html .= $start_th;
-            $html .= '<label for="' . $id . '">' . $name . '</label>';
-            $html .= $end_th . $start_td;
-            $html .= '<input type="text" name="'. $id . '" id="'. $id . '" value="' . (isset( $meta ) ? esc_attr( $meta ) : '') . '">';
-            $html .= $description;
-            $html .= $end_td;
+
+            $html.= '<input type="text" name="'.$name.'" id="'.$id.'" value="'.(isset( $meta ) ? esc_attr( $meta ) : '').'">';
+
             break;
 
         case 'relation':
-            $posttype = ( isset( $customfield['posttype'] ) && post_type_exists( $customfield['posttype'] ) ) ? $customfield['posttype'] : '' ;
-            $items = query_posts(array('post_type' => $posttype) );
 
-            $html .= $start_th;
-            $html .= '<label for="' . $id . '">' . $name . '</label>';
-            $html .= $end_th . $start_td;
-            $html .= '<select class="postform" name="'. $id . '" id="'. $id . '">';
-            $html .= '<option value="0"' . ( $meta == 0 ? '" selected="selected"' : '' ) .  ' >Choose a(n) ' . SoundlushHelpers::beautify($posttype) . '</option>';
-            foreach ( $items as $item ) {
-              $html .= '<option value="' . $item->ID . '"' . ( $meta == $item->ID ? '" selected="selected"' : '' ) .  ' >' . $item->post_title . '</option>';
+            $posttype = post_type_exists( $customfield['posttype'] ) ? $customfield['posttype'] : '' ;
+            $items    = query_posts( array( 'post_type' => $posttype, 'post_status' => 'publish' ) );
+
+            $html.= '<select class="postform" name="'.$name.'" id="'.$id.'">';
+            $html.= '<option value="0"'.( $meta == 0 ? '" selected="selected"' : '' ).' >Select a(n) '.SoundlushHelpers::beautify($posttype).'</option>';
+            foreach ( $items as $item )
+            {
+              $html.= '<option value="'.$item->ID.'"'.( $meta == $item->ID ? '" selected="selected"' : '' ).' >'.$item->post_title.'</option>';
             }
-            $html .= '</select>' . $description;
-            $html .= $end_td;
+            $html.= '</select>';
             break;
 
         default:
             break;
       }
 
-      $html .= '</'. $wrapper .'>';
+      $html.= $description;
+      $html.= $end_td;
+      $html.= '</'. $wrapper .'>';
 
       return $html;
 

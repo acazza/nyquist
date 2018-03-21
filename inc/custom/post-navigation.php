@@ -7,9 +7,8 @@
  * @package soundlush
  */
 
-if( !class_exists( 'SoundlushCustomPostNav' ) )
+if( ! class_exists( 'SoundlushCustomPostNav' ) )
 {
-
   class SoundlushCustomPostNav
   {
 

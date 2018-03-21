@@ -48,25 +48,28 @@ class SoundlushPostMeta
   *  Register custom field metabox for Posttype.
   *  @param array  $metabox
   */
-  public function add( $metabox )
+  public function add( $args )
   {
       // test if there are metabox arguments
-      if( empty( $metabox ) ) return;
-
+      if( empty( $args ) ) return;
 
       $defaults = array(
+          'title'   => '',
           'context' => 'normal',
           'priority'=> 'default',
           'repeater'=>  false
       );
 
+      $metabox = wp_parse_args( $args, $defaults );
+
       // metabox variables
-      $box_id         = SoundlushHelpers::uglify( $metabox['id'] );
-      $box_title      = SoundlushHelpers::beautify( $metabox['title'] );
-      $box_context    = isset( $metabox['context'] )  ? $metabox['context']  : 'normal';
-      $box_priority   = isset( $metabox['priority'] ) ? $metabox['priority'] : 'default';
-      $fields         = $metabox['fields'];
-      $repeater       = ( isset( $metabox['repeater'] ) && $metabox['repeater'] == true ) ? true : false;
+      $box_title    = !empty( $metabox['title'] ) ? $metabox['title'] : $metabox['id'];
+      $box_title    = SoundlushHelpers::beautify( $box_title );
+      $box_id       = SoundlushHelpers::uglify( $metabox['id'] );
+      $box_context  = $metabox['context'];
+      $box_priority = $metabox['priority'];
+      $fields       = $metabox['fields'];
+      $box_repeater = $metabox['repeater'] == true ? true : false;
 
 
       // update global list of fields
@@ -75,12 +78,12 @@ class SoundlushPostMeta
       }
 
       // register metabox
-      add_action( 'add_meta_boxes', function() use( $box_id, $box_title, $box_context, $box_priority, $fields, $repeater )
+      add_action( 'add_meta_boxes', function() use( $box_id, $box_title, $box_context, $box_priority, $fields, $box_repeater )
       {
         add_meta_box(
           $box_id,
           $box_title,
-          ( $repeater ) ? array( &$this, 'displayRepeaterMetabox' ) : array( &$this, 'displayMetabox' ) ,
+          $box_repeater ? array( &$this, 'displayRepeaterMetabox' ) : array( &$this, 'displayMetabox' ) ,
           $this->posttype_name,
           $box_context,
           $box_priority,
@@ -155,23 +158,29 @@ class SoundlushPostMeta
     $id          = $pre_id . SoundlushHelpers::uglify( $field['id'] );
     $name        = $prefix . SoundlushHelpers::uglify( $field['id'] ) . $suffix;
     $required    = $field['required'] ? ' required' : '';
-    $description = !empty( $field['desc'] ) ? '<span class="description">'.$field['desc'].'</span>' : '';
+    $description = !empty( $field['desc'] ) ? '<p class="description">'.$field['desc'].'</p>' : '';
 
-
-    // check if there is saved metadata for the field, if not use default value
+    // check if there is saved metadata for the field
+    // if not use default value
     $meta  = !empty( $postmeta ) ? $postmeta : $field['std'];
-    $html  = '';
+
+
+    $html  = '<tr><th scope="row">';
 
     switch ( $field['type'] )
     {
       case 'text':
 
-          $html = '<tr><th scope="row"><label for="' . $id . '">' . $label . ': </label></th><td><input type="text" class="widefat" name="' . $name . '" id="' . $id . '" value="' . $meta  . '"' . $required . ' />' . $description . '</td></tr>';
+          $html.= '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th><td>';
+          $html.= '<input type="text" class="widefat" name="'.$name.'" id="'.$id.'" value="'.$meta.'"'.$required.' />';
           break;
 
       case 'number':
 
-          $html = '<tr><th scope="row"><label for="' . $id . '">' . $label . ': </label></th><td><input type="number" name="' . $name . '" id="' . $id . '" value="' . $meta . '"' . $required . ' min="' . $field['min'] . '" max="' . $field['max'] . '" step="' . $field['step'] . '" /></br>' . $description . '</td></tr>';
+          $html.= '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th><td>';
+          $html.= '<input type="number" name="'.$name.'" id="'.$id.'" value="'.$meta.'"'.$required.' min="' . $field['min'].'" max="'.$field['max'].'" step="'.$field['step'].'" />';
           break;
 
       case 'file':
@@ -189,12 +198,17 @@ class SoundlushPostMeta
             $preview = '';
           }
 
-          $html = '<tr><th scope="row"><label for="' . $id . '">' . $label . ': </label></th><td>' . $preview . '<p>' . $filename . '</p><input type="file" class="widefat" name="' . $name . '" id="' . $id . '" value="' . $filename  . '"' . $required . ' accept="' . $field['accept'] . '" multiple="false"/>' . $description . '</td></tr>';
+          $html.= '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th><td>';
+          $html.= $preview.'<p>'.$filename.'</p>';
+          $html.= '<input type="file" class="widefat" name="'.$name.'" id="'.$id.'" value="'.$filename.'"'.$required.' accept="'.$field['accept'].'" multiple="false"/>';
           break;
 
       case 'textarea':
 
-          $html = '<tr><th scope="row"><label for="' . $id . '">' . $label . ': </label></th><td><textarea class="widefat" name="' . $name . '" id="' . $id . '" cols="60" rows="4" style="width:96%"' . $required . ' >' . $meta . '</textarea>'. $description . '</td></tr>';
+          $html.= '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th><td>';
+          $html.= '<textarea class="widefat" name="'.$name.'" id="'.$id.'" cols="60" rows="4" style="width:96%"'.$required.' >'.$meta.'</textarea>';
           break;
 
       case 'editor':
@@ -218,52 +232,76 @@ class SoundlushPostMeta
           ob_start(); //create buffer & echo the editor to the buffer
           wp_editor( htmlspecialchars_decode( $meta ), $id, $settings );
 
-          $html = '<tr><th scope="row"><label for="' . $id . '">' . $label . ': </label></th><td>';
-          $html .= ob_get_clean(); //store the contents of the buffer in the variable
-          $html .= $description .'</td></tr>';
+          $html.= '<label for="' . $id . '">' . $label . ': </label>';
+          $html.= '</th><td>';
+          $html.= ob_get_clean(); //store the contents of the buffer in the variable
           break;
 
       case 'checkbox':
 
           //TODO fieldset ???
-          $html = '<tr><th scope="row"><legend>Click me:</legend></th><td><input type="checkbox" name="' . $name . '" id="' . $id . '"' . ( $meta ? ' checked="checked"' : '') . ' /><label for="' . $id . '">' . $label . ' </label></br>' . $description . '</td></tr>';
+          $html.= '<legend>Click me:</legend>';
+          $html.= '</th><td>';
+          $html.= '<input type="checkbox" name="'.$name.'" id="'.$id.'"'.( $meta ? ' checked="checked"' : '').' />';
+          $html.= '<label for="'.$id.'">'.$label.' </label>';
           break;
 
       case 'select':
 
-          $html = '<tr><th scope="row"><label for="' . $id . '" >' . $label . ': </label></th><td><select name="' . $name . '" id="' . $id . '" >';
-          $html .= '<option value="' . $field['std'] . '"' . ( $meta == $field['std'] ? 'selected="selected"' : '' ) . '>-- Select an option --</option>';
-          foreach ( $field['options'] as $option ) {
-            $html .= '<option value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' selected="selected"' : '' ) . '>' . $option['label'] . '</option>';
+          $html.= '<label for="'.$id.'" >'.$label.': </label>';
+          $html.= '</th><td>';
+          $html.= '<select name="'.$name.'" id="'.$id.'" >';
+          $html.= '<option value="'.$field['std'].'"'.( $meta == $field['std'] ? 'selected="selected"' : '' ).'>-- Select an option --</option>';
+
+          foreach ( $field['options'] as $option )
+          {
+            $html.= '<option value="'.$option['value'].'"'.( $meta == $option['value'] ? ' selected="selected"' : '' ).'>'.$option['label'].'</option>';
           }
-          $html .= '</select></br>' . $description . '</td></tr>';
+
+          $html.= '</select>';
           break;
 
       case 'radio':
 
-          $html = '<tr><th scope="row"><label>' . $label . ': </label></th><td><ul>';
-          foreach ( $field['options'] as $option ) {
-            $html .= '<li><input type="radio" name="' . $name . '" id="' . $pre_id . $option['value'] . '" value="' . $option['value'] . '"' . ( $meta == $option['value'] ? ' checked="checked"' : '' ) . $required . '/><label for="' . $pre_id . $option['value'] . '">' . $option['label'] . '</label></li>';
+          $html.= '<label>'.$label.': </label>';
+          $html.= '</th><td>';
+          $html.= '<ul>';
+
+          foreach ( $field['options'] as $option )
+          {
+            $html.= '<li>';
+            $html.= '<input type="radio" name="'.$name.'" id="'.$pre_id.$option['value'].'" value="'.$option['value'].'"'.( $meta == $option['value'] ? ' checked="checked"' : '' ).$required. '/>';
+            $html.= '<label for="'.$pre_id.$option['value'].'">'.$option['label'].'</label>';
+            $html.= '</li>';
           }
-          $html .= '</ul>' . $description . '</td></tr>';
+
+          $html.= '</ul>';
           break;
 
       case 'relation':
 
           $posttype = post_type_exists( $field['posttype'] ) ? $field['posttype'] : '' ;
-          $items    = query_posts(array('post_type' => $posttype, 'post_status' => 'publish') );
+          $items    = query_posts( array( 'post_type' => $posttype, 'post_status' => 'publish' ) );
 
-          $html = '<tr><th scope="row"><label for="' . $id . '" >' . $label . ': </label></th><td><select name="' . $name . '" id="' . $id . '" >';
-          $html .= '<option value="' . $field['std'] . '"' . ( $meta == $field['std'] ? ' selected="selected"' : '') . '>-- Select an option --</option>';
-          foreach ( $items as $item ) {
-            $html .= '<option value="' . $item->ID . '" ' . ( $meta == $item->ID ? '" selected="selected"' : '' ) . '>' . $item->post_title . '</option>';
+          $html.= '<label for="'.$id.'" >'.$label.': </label>';
+          $html.= '</th><td>';
+          $html.= '<select name="'.$name.'" id="'.$id.'" >';
+          $html.= '<option value="0"'.( $meta == 0 ? '" selected="selected"' : '' ).' >Select a(n) '.SoundlushHelpers::beautify($posttype).'</option>';
+
+          foreach ( $items as $item )
+          {
+            $html.= '<option value="'.$item->ID.'" '.( $meta == $item->ID ? '" selected="selected"' : '' ).'>'.$item->post_title.'</option>';
           }
-          $html .= '</select></br>' . $description . '</td></tr>';
+
+          $html.= '</select>';
           break;
 
       default:
           break;
     }
+
+    $html.= $description;
+    $html.= '</td></tr>';
 
     return $html;
 
@@ -451,13 +489,13 @@ class SoundlushPostMeta
 
 
             // check if we are trying to uploaded a file
-            if (!empty($_FILES[ $field['id'] ]) && $_FILES[ $field['id'] ]['error'] == UPLOAD_ERR_OK)
+            if( !empty($_FILES[ $field['id'] ]) && $_FILES[ $field['id'] ]['error'] == UPLOAD_ERR_OK )
             {
                 // create custom upload dir
                  wp_mkdir_p( self::$upload_subdir );
 
                 // make sure we're dealing with an upload
-                if (is_uploaded_file($_FILES[ $field['id'] ]['tmp_name']) === false){
+                if( is_uploaded_file( $_FILES[ $field['id'] ]['tmp_name'] ) === false ){
                     throw new \Exception('Error on upload: Invalid file definition');
                 }
 
@@ -472,7 +510,7 @@ class SoundlushPostMeta
                 $upload      = move_uploaded_file( $source, $destination);
 
                 // insert file meta into database
-                if($upload) update_post_meta( $post->ID, $field['id'], $_FILES[$field['id']] );
+                if( $upload ) update_post_meta( $post->ID, $field['id'], $_FILES[$field['id']] );
 
             }
 

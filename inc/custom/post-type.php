@@ -1,6 +1,6 @@
 <?php
 
-if( !class_exists( 'SoundlushPostType' ) )
+if( ! class_exists( 'SoundlushPostType' ) )
 {
 class SoundlushPostType
 {
