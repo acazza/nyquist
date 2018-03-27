@@ -22,14 +22,14 @@ $anthology->register();
 
 $options = array(
     'hierarchical' => true,
-    'rewrite'      => array( 'slug'=> 'anthology' ), // set parent slug
+    //'rewrite'      => array( 'slug'=> 'anthology' ), // set parent slug
     'supports'     => array( 'title', 'editor', 'author','thumbnail', 'excerpt', 'page-attributes' )
 );
 
 
 $comics = new SoundlushPostType('comic_book', $options);
 
-$comics->setAsParent('anthology');
+//$comics->setAsParent('anthology');
 
 // add the Volume Taxonomy
 $comics->taxonomy('volume');

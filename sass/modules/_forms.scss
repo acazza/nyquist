@@ -49,3 +49,51 @@
     font-weight: 300;
   }
 }
+
+
+input,
+textarea {
+  //border-width: 0px;
+  &:focus{
+    outline-color: $color_primary;
+    outline-width: 3px;
+  }
+}
+
+
+textarea {
+  resize: vertical;
+}
+
+.has-error {
+  input {
+    border-color: red;
+  }
+}
+
+.text-danger {
+  color: red;
+}
+
+.text-info {
+  color: blue;
+}
+
+.text-success {
+  color: green;
+}
+
+.form-control-msg {
+  display: none;
+  padding: 0 0.5em;
+}
+
+.has-error {
+  .form-control-msg {
+    display: block;
+  }
+}
+
+.js-show-form-feedback {
+  display: block
+}

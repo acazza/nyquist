@@ -35,7 +35,7 @@ jQuery( document ).ready( function($){
      var data = "action=retake_user_quiz";
 
      $.ajax({
-       url: soundlushquiz.ajax_url, //tells the Ajax call where to send the request
+       //url: soundlushquiz.ajax_url, //tells the Ajax call where to send the request
        type : 'post',
        data : data,
        success : function( response ) {
@@ -55,7 +55,7 @@ jQuery( document ).ready( function($){
      var data = "action=start_user_quiz";
 
      $.ajax({
-       url: soundlushquiz.ajax_url, //tells the Ajax call where to send the request
+       //url: soundlushquiz.ajax_url, //tells the Ajax call where to send the request
        type : 'post',
        data : data,
        success : function( response ) {
@@ -78,9 +78,8 @@ jQuery( document ).ready( function($){
        return "&"+$(elem).attr("name") + "="+ $(elem).val();
     }).join('');
 
-
     $.ajax({
-      url: soundlushquiz.ajax_url, //tells the Ajax call where to send the request
+    //url: soundlushquiz.ajax_url, //tells the Ajax call where to send the request
       type : 'post',
       data : data,
 		  success : function( response ) {
@@ -93,6 +92,81 @@ jQuery( document ).ready( function($){
 
     })
   });
+
+  /**
+   *  FRONTEND USER SUBMISSION FORM
+   */
+
+  $('#soundlush_exercise').on('submit', function(e)
+  {
+      // stop default submit behavior
+      e.preventDefault();
+
+      // remove all previous error/feedback messages
+      $('.has-error').removeClass('has-error');
+      $('.js-show-form-feedback').removeClass('js-show-form-feedback');
+
+      // get form data
+      var form     = $(this),
+          file     = form.find('#soundlush_exercise_submitted_file').val(),
+          comments = form.find('#soundlush_exercise_submitted_comments').val(),
+          user     = form.data('user'),
+          exercise = form.data('id'),
+          ajaxurl  = form.data('url');
+
+
+      // check if required fields are filled in
+      if( file == '' ){
+        $('#soundlush_exercise_submitted_file').parents('.form-control').addClass('has-error');
+        console.log('Required inputs are empty');
+        return;
+      } // TODO check if file is from the accepted type
+
+      // disable submit button during ajax call to avoid multiple submissions
+      form.find('input, button, textarea').attr('disabled', 'disabled');
+      $('.js-form-submission').addClass('js-show-form-feedback');
+
+      // submit data
+      $.ajax({
+        url: ajaxurl,
+        type : 'post',
+        data : {
+            user : user,
+            exercise : exercise,
+            file : file,
+            comments : comments,
+            action: 'save_frontend_submission'
+        },
+        error : function( response ){
+
+          $('.js-form-submission').removeClass('js-show-form-feedback');
+          $('.js-form-error').addClass('js-show-form-feedback');
+          form.find('input, button, textarea').removeAttr('disabled');
+
+        },
+  		  success : function( response ){
+
+            if( response.success == 0 ) {
+
+              setTimeout(function(){
+                $('.js-form-submission').removeClass('js-show-form-feedback');
+                $('.js-form-error').addClass('js-show-form-feedback');
+                form.find('input, button, textarea').removeAttr('disabled');
+              }, 2000);
+
+            } else {
+
+              setTimeout(function(){
+                $('.js-form-submission').removeClass('js-show-form-feedback');
+                $('.js-form-success').addClass('js-show-form-feedback');
+                form.find('input, button, textarea').removeAttr('disabled').val('');
+              }, 2000);
+
+            }
+  		  }
+      })
+
+  })
 
 
 });

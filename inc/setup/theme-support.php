@@ -7,6 +7,17 @@
  * @package com.soundlush.theme.v1
  */
 
+ function mailtrap($phpmailer) {
+   $phpmailer->isSMTP();
+   $phpmailer->Host = 'smtp.mailtrap.io';
+   $phpmailer->SMTPAuth = true;
+   $phpmailer->Port = 2525;
+   $phpmailer->Username = 'e6a8b2dc92c1ed';
+   $phpmailer->Password = '86d14489014aa8';
+ }
+
+ add_action('phpmailer_init', 'mailtrap');
+
 function soundlush_theme_support_setup()
 {
   add_theme_support( 'post-formats',

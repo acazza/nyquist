@@ -31,6 +31,12 @@ require get_template_directory() . '/inc/custom/post-type.php';
 require get_template_directory() . '/inc/custom/post-navigation.php';
 
 require get_template_directory() . '/inc/lms/comics.php';
+//require get_template_directory() . '/inc/lms/courses.php';
+//require get_template_directory() . '/inc/lms/lessons.php';
+require get_template_directory() . '/inc/lms/exercise.php';
+//require get_template_directory() . '/inc/lms/quizzes.php';
+
+
 
 /**
  * Load Jetpack compatibility file.

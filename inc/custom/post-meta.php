@@ -141,6 +141,7 @@ class SoundlushPostMeta
         'desc'        => '',                                    // (string)   all
         'std'         => '',                                    // (mixed)    all
         'required'    => false,                                 // (boolean)  all BUT checkbox
+        'readonly'    => false,
         'allow_tags'  => false,                                 // (boolean)  text & textarea
         'min'         => 0,                                     // (int)      number
         'max'         => 10,                                    // (int)      number
@@ -158,6 +159,7 @@ class SoundlushPostMeta
     $id          = $pre_id . SoundlushHelpers::uglify( $field['id'] );
     $name        = $prefix . SoundlushHelpers::uglify( $field['id'] ) . $suffix;
     $required    = $field['required'] ? ' required' : '';
+    $readonly    = $field['readonly'] ? ' readonly' : '';
     $description = !empty( $field['desc'] ) ? '<p class="description">'.$field['desc'].'</p>' : '';
 
     // check if there is saved metadata for the field
@@ -165,22 +167,25 @@ class SoundlushPostMeta
     $meta  = !empty( $postmeta ) ? $postmeta : $field['std'];
 
 
-    $html  = '<tr><th scope="row">';
+    $html = '<tr>';
+    $html.=   '<th scope="row">';
 
     switch ( $field['type'] )
     {
       case 'text':
 
-          $html.= '<label for="'.$id.'">'.$label.': </label>';
-          $html.= '</th><td>';
-          $html.= '<input type="text" class="widefat" name="'.$name.'" id="'.$id.'" value="'.$meta.'"'.$required.' />';
+          $html.=   '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<input type="text" class="widefat" name="'.$name.'" id="'.$id.'" value="'.$meta.'"'.$required.$readonly.' />';
           break;
 
       case 'number':
 
-          $html.= '<label for="'.$id.'">'.$label.': </label>';
-          $html.= '</th><td>';
-          $html.= '<input type="number" name="'.$name.'" id="'.$id.'" value="'.$meta.'"'.$required.' min="' . $field['min'].'" max="'.$field['max'].'" step="'.$field['step'].'" />';
+          $html.=   '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<input type="number" name="'.$name.'" id="'.$id.'" value="'.$meta.'"'.$required.$readonly.' min="' . $field['min'].'" max="'.$field['max'].'" step="'.$field['step'].'" />';
           break;
 
       case 'file':
@@ -198,17 +203,20 @@ class SoundlushPostMeta
             $preview = '';
           }
 
-          $html.= '<label for="'.$id.'">'.$label.': </label>';
-          $html.= '</th><td>';
-          $html.= $preview.'<p>'.$filename.'</p>';
-          $html.= '<input type="file" class="widefat" name="'.$name.'" id="'.$id.'" value="'.$filename.'"'.$required.' accept="'.$field['accept'].'" multiple="false"/>';
+          $html.=   '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   $preview;
+          $html.=   '<p>'.$filename.'</p>';
+          $html.=   '<input type="file" class="widefat" name="'.$name.'" id="'.$id.'" value="'.$filename.'"'.$required.$readonly.' accept="'.$field['accept'].'" multiple="false"/>';
           break;
 
       case 'textarea':
 
-          $html.= '<label for="'.$id.'">'.$label.': </label>';
-          $html.= '</th><td>';
-          $html.= '<textarea class="widefat" name="'.$name.'" id="'.$id.'" cols="60" rows="4" style="width:96%"'.$required.' >'.$meta.'</textarea>';
+          $html.=   '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<textarea class="widefat" name="'.$name.'" id="'.$id.'" cols="60" rows="4" style="width:96%"'.$required.$readonly.' >'.$meta.'</textarea>';
           break;
 
       case 'editor':
@@ -232,50 +240,53 @@ class SoundlushPostMeta
           ob_start(); //create buffer & echo the editor to the buffer
           wp_editor( htmlspecialchars_decode( $meta ), $id, $settings );
 
-          $html.= '<label for="' . $id . '">' . $label . ': </label>';
-          $html.= '</th><td>';
-          $html.= ob_get_clean(); //store the contents of the buffer in the variable
+          $html.=   '<label for="' . $id . '">' . $label . ': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   ob_get_clean(); //store the contents of the buffer in the variable
           break;
 
       case 'checkbox':
 
-          //TODO fieldset ???
-          $html.= '<legend>Click me:</legend>';
-          $html.= '</th><td>';
-          $html.= '<input type="checkbox" name="'.$name.'" id="'.$id.'"'.( $meta ? ' checked="checked"' : '').' />';
-          $html.= '<label for="'.$id.'">'.$label.' </label>';
+          //$html.=   '<label>Click me:</label>';
+          $html.=   '<label for="'.$id.'">'.$label.' </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<input type="checkbox" name="'.$name.'" id="'.$id.'"'.( $meta ? ' checked="checked"' : '').$readonly.' />';
+          //$html.=   '<label for="'.$id.'">'.$label.' </label>';
           break;
 
       case 'select':
 
-          $html.= '<label for="'.$id.'" >'.$label.': </label>';
-          $html.= '</th><td>';
-          $html.= '<select name="'.$name.'" id="'.$id.'" >';
-          $html.= '<option value="'.$field['std'].'"'.( $meta == $field['std'] ? 'selected="selected"' : '' ).'>-- Select an option --</option>';
+          $html.=   '<label for="'.$id.'" >'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<select name="'.$name.'" id="'.$id.'"'.$readonly.' >';
+          $html.=     '<option value="'.$field['std'].'"'.( $meta == $field['std'] ? 'selected="selected"' : '' ).'>-- Select an option --</option>';
 
-          foreach ( $field['options'] as $option )
-          {
-            $html.= '<option value="'.$option['value'].'"'.( $meta == $option['value'] ? ' selected="selected"' : '' ).'>'.$option['label'].'</option>';
-          }
+            foreach ( $field['options'] as $option ){
+              $html.= '<option value="'.$option['value'].'"'.( $meta == $option['value'] ? ' selected="selected"' : '' ).'>'.$option['label'].'</option>';
+            }
 
-          $html.= '</select>';
+          $html.=   '</select>';
           break;
 
       case 'radio':
 
-          $html.= '<label>'.$label.': </label>';
-          $html.= '</th><td>';
-          $html.= '<ul>';
+          $html.=   '<label>'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<ul>';
 
           foreach ( $field['options'] as $option )
           {
-            $html.= '<li>';
-            $html.= '<input type="radio" name="'.$name.'" id="'.$pre_id.$option['value'].'" value="'.$option['value'].'"'.( $meta == $option['value'] ? ' checked="checked"' : '' ).$required. '/>';
-            $html.= '<label for="'.$pre_id.$option['value'].'">'.$option['label'].'</label>';
-            $html.= '</li>';
+            $html.=     '<li>';
+            $html.=       '<input type="radio" name="'.$name.'" id="'.$pre_id.$option['value'].'" value="'.$option['value'].'"'.( $meta == $option['value'] ? ' checked="checked"' : '' ).$required.$readonly. '/>';
+            $html.=       '<label for="'.$pre_id.$option['value'].'">'.$option['label'].'</label>';
+            $html.=     '</li>';
           }
 
-          $html.= '</ul>';
+          $html.=   '</ul>';
           break;
 
       case 'relation':
@@ -283,25 +294,32 @@ class SoundlushPostMeta
           $posttype = post_type_exists( $field['posttype'] ) ? $field['posttype'] : '' ;
           $items    = query_posts( array( 'post_type' => $posttype, 'post_status' => 'publish' ) );
 
-          $html.= '<label for="'.$id.'" >'.$label.': </label>';
-          $html.= '</th><td>';
-          $html.= '<select name="'.$name.'" id="'.$id.'" >';
-          $html.= '<option value="0"'.( $meta == 0 ? '" selected="selected"' : '' ).' >Select a(n) '.SoundlushHelpers::beautify($posttype).'</option>';
+          $html.=   '<label for="'.$id.'" >'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<select name="'.$name.'" id="'.$id.'"'.$readonly.' >';
+          $html.=     '<option value="0"'.( $meta == 0 ? '" selected="selected"' : '' ).' >Select a(n) '.SoundlushHelpers::beautify($posttype).'</option>';
 
-          foreach ( $items as $item )
-          {
-            $html.= '<option value="'.$item->ID.'" '.( $meta == $item->ID ? '" selected="selected"' : '' ).'>'.$item->post_title.'</option>';
+          foreach ( $items as $item ){
+            $html.=   '<option value="'.$item->ID.'" '.( $meta == $item->ID ? '" selected="selected"' : '' ).'>'.$item->post_title.'</option>';
           }
 
-          $html.= '</select>';
+          $html.=   '</select>';
           break;
 
+      case 'now':
+          $html.=   '<label for="'.$id.'">'.$label.': </label>';
+          $html.= '</th>';
+          $html.= '<td>';
+          $html.=   '<input type="date" class="widefat" name="'.$name.'" id="'.$id.'" value="'.$meta.'"'.$required.$readonly.' />';
+          break;
       default:
           break;
     }
 
-    $html.= $description;
-    $html.= '</td></tr>';
+    $html.=   $description;
+    $html.=   '</td>';
+    $html.= '</tr>';
 
     return $html;
 
@@ -374,12 +392,12 @@ class SoundlushPostMeta
         $output .= $this->create_html_markup( $field, $data, $prefix, $suffix, $pre_id );
 
       }
-
       ?>
+
       <span id="here" style="display: block;"></span>
       <button class="add button-primary" style="margin: 2em 0;"><?php _e( 'Add Item' ); ?></button>
 
-
+      <?php //TODO add a hook (admin footer) to include the script in the EOF ?>
       <?php $this->add_script( $c, $output ); ?>
 
       </div> <!-- #meta_inner -->
@@ -501,6 +519,7 @@ class SoundlushPostMeta
 
                 // rename file
                 $uploadName = sanitize_file_name( $_FILES[ $field['id'] ]['name'] );
+                //TODO check file extension
                 $filename   = round( microtime( true ) ) . '_' . $uploadName;
                 $_FILES[ $field['id'] ]['name'] = $filename;
 
