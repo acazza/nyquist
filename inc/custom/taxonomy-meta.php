@@ -56,7 +56,7 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
     {
       $customfields = $this->customfields;
 
-      wp_nonce_field( basename( __FILE__ ), 'custom_taxmeta_nonce' );
+      wp_nonce_field( basename( __FILE__ ), '_custom_taxmeta_nonce' );
 
       foreach( $customfields as $customfield )
       {
@@ -90,7 +90,7 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
         $end_td   = '</td>';
 
         // retrieve the existing value for this meta field.
-        $term_meta = get_term_meta( $t_id, SoundlushHelpers::uglify( $customfield['id']), true );
+        $term_meta = get_term_meta( $t_id, '_'.SoundlushHelpers::uglify( $customfield['id']), true );
 
         echo $this->create_html_markup($customfield, $wrapper, $term_meta, $start_th, $end_th, $start_td, $end_td  );
       }
@@ -186,34 +186,36 @@ if( ! class_exists( 'SoundlushTaxonomyMeta' ) )
     function save_taxonomy_custom_meta( $term_id )
     {
         // verify nonce
-        if( !isset($_POST['custom_taxmeta_nonce']) || !wp_verify_nonce( $_POST['custom_taxmeta_nonce'], basename(__FILE__) ) ) return;
+        if( !isset($_POST['_custom_taxmeta_nonce']) || !wp_verify_nonce( $_POST['_custom_taxmeta_nonce'], basename(__FILE__) ) ) return;
 
         // get term id
         $t_id = $term_id;
 
         // save custom fields
-        if( isset( $_POST ) && ! empty( $t_id ) )
+        if( isset( $_POST ) && !empty( $t_id ) )
         {
           $fields = $this->customfields;
 
-          if( $fields  && ! empty( $fields ) )
+          if( $fields  && !empty( $fields ) )
           {
             // sanitize fields
             foreach( $fields as $field )
             {
-              if( isset( $_POST[$field['id']]) )
+              $name = '_'. SoundlushHelpers::uglify($field['id']);
+
+              if( isset( $_POST[$name]) )
               {
                 switch( $field['type'] )
                 {
                   case 'text':
-                    $new = sanitize_text_field( $_POST[$field['id']] );
+                    $new = sanitize_text_field( $_POST[$name] );
                     break;
                   default:
-                    $new = $_POST[$field['id']];
+                    $new = $_POST[$name];
                     break;
                 }
                 // save term metadata
-                update_term_meta($t_id, $field['id'], $new);
+                update_term_meta($t_id, $name, $new);
               }
             }
           }

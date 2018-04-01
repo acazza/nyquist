@@ -2,10 +2,9 @@
 
 function get_tree_structure()
 {
-  //TODO get this dinamicaly
+
   $taxonomy     = 'volume';
   $metakey      = '_meta_mycourse';
-  $metavalue    = '247';
 
   $current_post = get_the_id();
   $metavalue    = wp_get_post_parent_id( $current_post );
@@ -19,7 +18,7 @@ function get_tree_structure()
           'meta_query' => array(
               array(
                 'key'     => $metakey,
-                'value'   => $metavalue,
+                'value'   => 247, //$metavalue, // TODO get this dinamicaly
                 'compare' => 'LIKE',
           ))
       )
@@ -45,17 +44,14 @@ function get_tree_structure()
     'show_count'          => 0,
     'show_option_all'     => '',
     'show_option_none'    => '', //__( 'No categories' ),
-    'style'               => 'accordion',
+    'style'               => 'list',
     'taxonomy'            => $taxonomy,
-    'title_li'            => __( 'Course Index' ),
+    'title_li'            => '', //__( 'Categories' ),
     'use_desc_for_title'  => 1,
     'walker'              => new SoundlushTreeStructure
   );
 
-
-  echo '<div class="accordion js-accordion">';
   wp_list_categories($args);
-
 
 }
 
@@ -68,117 +64,95 @@ if( ! class_exists('SoundlushTreeStructure') )
       public $tree_type = 'category';
       public $db_fields = array( 'parent'=>'parent', 'id'=>'term_id' );
 
+      // TODO get this dinamicaly
+      public $taxonomy  = 'volume';
+
 
 
       function start_lvl( &$output, $depth = 0, $args = array() )
       {
-        $indent  = str_repeat( "\t", $depth );
+        if( 'list' != $args['style'] ) return;
 
-        switch( $args['style'] ) {
-          case 'list':
-            $output .= "{$indent}<ul class='tree-children children'>\n";
-            break;
-          case 'accordion':
-            $output .= $indent.'<div class="accordion js-accordion">';
-            break;
-          default:
-            break;
-        }
+        $indent  = str_repeat( "\t", $depth );
+        $output .= "{$indent}<ul class='tree-children children'>\n";
       }
 
 
 
       function end_lvl( &$output, $depth = 0, $args = array() )
       {
-        $indent  = str_repeat( "\t", $depth );
+        if( 'list' != $args['style'] ) return;
 
-        switch( $args['style'] ) {
-          case 'list':
-            $output .= "{$indent}</ul>\n";
-            break;
-          case 'accordion':
-            $output .= $indent.'</div><!--.accordion-->';
-            break;
-          default:
-            break;
-        }
+        $indent  = str_repeat( "\t", $depth );
+        $output .= "{$indent}</ul>\n";
       }
 
 
 
       function start_el( &$output, $category, $depth = 0, $args = array(), $current_object_id = 0 )
       {
-        $cat_name      = apply_filters( 'list_cats', esc_attr( $category->name ), $category );
-        $postlink      = '';
-        $_current_post = get_the_id();
-        $post_type     = get_post_type();
-
+        $cat_name = apply_filters(
+      			'list_cats',
+      			esc_attr( $category->name ),
+      			$category
+    		);
 
         // Don't generate an element if the category name is empty.
 		    if ( ! $cat_name ) return;
     		$termlink = $cat_name;
 
+        // Custom
+        $post_type = get_post_type();
 
         $posts = get_posts( array(
           'post_type' => $post_type,
           'numberposts' => -1,
           'tax_query' => array(
             array(
-              'taxonomy' => $category->taxonomy,
+              'taxonomy' => $this->taxonomy,
               'field' => 'id',
               'terms' => $category->term_id,
               'include_children' => false
             )
           )
         ));
-
+        $postlink = '';
+        $_current_post = get_the_id();
 
 
         if($posts)
         {
-          $user = get_current_user_id();
-          $parent = '247'; //TODO get dinamicaly
-          $completed = get_user_meta( $user, '_soundlush_usercomplete_'.$parent, false );
-          $search = $completed[0];
-
-          $postlink .= '<div class="accordion-body__contents">';
-
+          $postlink = '<ul>';
           foreach( $posts as $post )
           {
-            if( in_array( $post->ID, $search ) ){
-              $css_completed = 'marked-completed';
-            } else {
-              $css_completed = '';
-            }
-
             $css_classes_post = '';
             if( $_current_post == $post->ID ){
-              $css_classes_post = 'current-post';
+              $css_classes_post = 'current_post';
             }
             $postlink .= '<a class="tree-post-link" href="'. esc_url( get_the_permalink( $post->ID ) ) .'">';
-            $postlink .= '<div class="tree-item tree-post-item tree-post-item-'.$post->ID.' depth-'. ($depth + 1).' '.$css_classes_post.'">';
+            $postlink .= '<li class="tree-item tree-post-item tree-post-item-'.$post->ID.' depth-'. ($depth + 1).' '.$css_classes_post.'">';
             $postlink .= get_the_title($post->ID);
-            $postlink .= '<i class="fas fa-check tree-icon-item '.$css_completed.'"></i>';
+            $postlink .= '<i class="fas fa-check tree-icon-item"></i>';
             $postlink .= '<i class="fas fa-eye tree-icon-item"></i>';
-            $postlink .= '</div></a>';
+
+            $postlink .= '</li></a>';
           }
-          $postlink .= '</div> <!--.accordion-body__contents-->';
+          $postlink .= '</ul>';
         }
 
 
+        if ( 'list' == $args['style'] )
+        {
+    			$output     .= "\t<li";
     			$css_classes = array(
-            'accordion-header',
-            'js-accordion-header',
             'tree-item',
-            'tree-cat-item',
-            'tree-cat-item-' . $category->term_id,
-            'depth-'.$depth
+    				'tree-cat-item',
+    				'tree-cat-item-' . $category->term_id,
+            'depth-'.$depth,
     			);
 
-
-    			if ( !empty( $args['current_category'] ) )
+    			if ( ! empty( $args['current_category'] ) )
           {
-
     				// 'current_category' can be an array, so we use `get_terms()`.
     				$_current_terms = get_terms(
     					$category->taxonomy, array(
@@ -187,56 +161,45 @@ if( ! class_exists('SoundlushTreeStructure') )
     					)
     				);
 
-            // add classes to the current_term and its ancestors
+            // run through all current terms
     				foreach ( $_current_terms as $_current_term )
             {
-
-              if ( $category->term_id == $_current_term->term_id ){
+              // add classes to the current_term and its direct parent
+              if ( $category->term_id == $_current_term->term_id )
+              {
     						$css_classes[] = 'current-cat';
     					} elseif ( $category->term_id == $_current_term->parent ) {
     						$css_classes[] = 'current-cat-parent';
     					}
 
-              while ( $_current_term->parent ){
+              while ( $_current_term->parent )
+              {
     						if ( $category->term_id == $_current_term->parent ) {
     							$css_classes[] = 'current-cat-ancestor';
     							break;
     						}
     						$_current_term = get_term( $_current_term->parent, $category->taxonomy );
     					}
-
     				}
     			}
 
     			$css_classes = implode( ' ', apply_filters( 'category_css_class', $css_classes, $category, $depth, $args ) );
-
-
-          $output .= '<div class="accordion__item js-accordion-item">';
-          $output .= "\t<div";
-    			$output .= ' class="' . $css_classes . '">';
-    			$output .= "$termlink\n";
-          $output .= "\t</div><!--.accordion-header-->";
-          $output .= '<div class="accordion-body js-accordion-body">';
+    			$output .= ' class="' . $css_classes . '"';
+    			$output .= ">$termlink\n";
           $output .= $postlink;
-
-
+    		} elseif ( isset( $args['separator'] ) ) {
+    			$output .= "\t$termlink" . $args['separator'] . "\n";
+    		} else {
+    			$output .= "\t$termlink<br />\n";
+    		}
       }
 
 
 
       function end_el( &$output, $category, $depth = 0, $args = array() )
       {
-        switch( $args['style'] ) {
-          case 'list':
-            $output .= "</li>\n";
-            break;
-          case 'accordion':
-            $output .= "</div><!--.accordion-body-->";
-            $output .= "</div><!--.accordion__item-->\n";
-            break;
-          default:
-            break;
-        }
+        if( 'list' != $args['style'] ) return;
+        $output .= "</li>\n";
       }
 
     }

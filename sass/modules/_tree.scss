@@ -1,0 +1,156 @@
+
+.tree-structure{
+
+  font-size: 15px;
+
+
+  //   background-color: #eee;
+  //   color: #444;
+  //   background-color: #ccc;
+  //   color: #777;
+
+  .current-post{
+    color: $color_primary;
+  }
+
+
+  ul{
+    list-style-type: none;
+    margin: 0;
+  }
+
+  a.tree-post-link{
+    color: #444;
+    &:hover,
+    &:active,
+    &:focus{
+      color: #212121;
+    }
+  }
+
+  svg.tree-icon-item{
+    font-size: 13px;
+    float: right;
+    padding: 4px;
+    color: $color_base_dark;
+  }
+
+  svg.marked-completed,
+  svg.marked-viewed{
+    color: #66CD00;
+  }
+
+
+  .tree-item{
+    //padding-top: 0.6em;
+    //padding-bottom: 0.6em;
+  }
+
+  .tree-post-item{
+    padding-right: 14px;
+  }
+
+}
+
+///////////
+
+.accordion {
+  font-size: 1rem;
+  width: 25vw;
+  margin: 0 auto;
+  border-radius: 5px;
+}
+
+.accordion-header,
+.accordion-body {
+  background: white;
+}
+
+.accordion-header {
+  padding: 1.5em 1.5em;
+  background: #eee;
+  text-transform: uppercase;
+  color: #666;
+  cursor: pointer;
+  font-size: .8em;
+  letter-spacing: .1em;
+  -webkit-transition: all .3s;
+  transition: all .3s;
+}
+
+.accordion-header:hover {
+  background: #ccc;
+  position: relative;
+  z-index: 5;
+}
+
+.accordion-body {
+  background: #fcfcfc;
+  color: #3f3c3c;
+  display: none;
+}
+
+.accordion-body__contents {
+  padding: 1.25em 1em;
+  font-size: .85em;
+}
+
+.accordion__item.active:last-child .accordion-header {
+  border-radius: none;
+}
+
+.accordion:first-child > .accordion__item > .accordion-header {
+  border-bottom: 1px solid transparent;
+}
+
+.accordion__item > .accordion-header:after {
+  content: "\f3d0";
+  font-family: IonIcons;
+  font-size: 1.2em;
+  float: right;
+  position: relative;
+  top: -2px;
+  -webkit-transition: .3s all;
+  transition: .3s all;
+  -webkit-transform: rotate(0deg);
+          transform: rotate(0deg);
+}
+
+.accordion__item.active > .accordion-header:after {
+  -webkit-transform: rotate(-180deg);
+          transform: rotate(-180deg);
+}
+
+.accordion__item.active .accordion-header {
+  background: #ccc;
+}
+
+.accordion__item .accordion__item .accordion-header {
+  background: #f1f1f1;
+  color: #666;
+}
+
+
+.depth-0{
+  padding-left: 1.2em
+}
+.depth-1{
+  padding-left: 2.4em
+}
+.depth-2{
+  padding-left: 3.6em
+}
+.depth-3{
+  padding-left: 4.8em
+}
+
+
+@media screen and (max-width: 1000px) {
+  body {
+    padding: 1em;
+  }
+
+  .accordion {
+    width: 100%;
+  }
+}

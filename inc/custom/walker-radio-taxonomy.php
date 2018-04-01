@@ -23,7 +23,7 @@ class SoundlushWalkerRadioTaxonomy extends Walker
   function start_el( &$output, $category, $depth = 0, $args = array(), $current_object_id = 0 )
   {
     extract( $args );
-    if ( empty($taxonomy) )
+    if ( empty( $taxonomy ) )
       $taxonomy = 'category';
 
     if( $taxonomy == 'category' ) :

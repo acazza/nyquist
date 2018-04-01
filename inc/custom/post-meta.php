@@ -22,7 +22,7 @@ class SoundlushPostMeta
    * @var string
    */
   public static $upload_dir;
-  public static $upload_subdir;
+  public static $upload_path;
   public static $upload_url;
 
 
@@ -36,9 +36,9 @@ class SoundlushPostMeta
   {
     $this->posttype_name = $posttype_name;
 
-    self::$upload_dir    = wp_upload_dir();
-    self::$upload_subdir = trailingslashit( self::$upload_dir['basedir'] ) . 'soundlush_uploads/postmeta/';
-    self::$upload_url    = trailingslashit( self::$upload_dir['baseurl'] ) . 'soundlush_uploads/postmeta/';
+    self::$upload_dir  = wp_upload_dir();
+    self::$upload_path = trailingslashit( self::$upload_dir['basedir'] ) . 'soundlush_uploads/postmeta/';
+    self::$upload_url  = trailingslashit( self::$upload_dir['baseurl'] ) . 'soundlush_uploads/postmeta/';
   }
 
 
@@ -106,7 +106,7 @@ class SoundlushPostMeta
     $fields = $data['args'];
 
     // create nonce field
-    wp_nonce_field( basename( __FILE__ ), 'custom_post_type_nonce' );
+    wp_nonce_field( basename( __FILE__ ), '_custom_post_type_nonce' );
 
     echo '<table class="form-table">';
 
@@ -114,7 +114,7 @@ class SoundlushPostMeta
     foreach( $fields as $field )
     {
       $postmeta = get_post_meta( $post->ID, SoundlushHelpers::uglify( $field['id']), true );
-      $prefix = '_';
+      $prefix = '_'; //TODO Forgot, implications on saving
        echo $this->create_html_markup( $field, $postmeta );
     }
 
@@ -461,10 +461,10 @@ class SoundlushPostMeta
       if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
 
       // verify nonce
-      if( !isset($_POST['custom_post_type_nonce']) || !wp_verify_nonce( $_POST['custom_post_type_nonce'], basename(__FILE__) ) ) return;
+      if( !isset($_POST['_custom_post_type_nonce']) || !wp_verify_nonce( $_POST['_custom_post_type_nonce'], basename(__FILE__) ) ) return;
 
       // check permissions
-      if('page' == $_POST['custom_post_type_nonce'] && ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  )  ) ) return;
+      if('page' == $_POST['_custom_post_type_nonce'] && ( !current_user_can('edit_page', $post->ID ) || !current_user_can('edit_post', $post->ID  )  ) ) return;
 
 
       // save custom fields
@@ -473,7 +473,7 @@ class SoundlushPostMeta
 
         // PROVISORIO
         if( isset( $_POST['_repeater'] ) ){
-          update_post_meta( $post->ID, _repeater,  $_POST['_repeater']  );
+          update_post_meta( $post->ID, '_repeater',  $_POST['_repeater']  );
         }
 
         if( $fields  && ! empty( $fields ) )
@@ -518,14 +518,15 @@ class SoundlushPostMeta
                 }
 
                 // rename file
-                $uploadName = sanitize_file_name( $_FILES[ $field['id'] ]['name'] );
+                $filename = $_FILES[ $field['id'] ]['name'];
+                $filename_sanitized = sanitize_file_name( $filename );
                 //TODO check file extension
-                $filename   = round( microtime( true ) ) . '_' . $uploadName;
-                $_FILES[ $field['id'] ]['name'] = $filename;
+                $filename_changed   = round( microtime( true ) ) . '_' . $filename_sanitized;
+                $_FILES[ $field['id'] ]['name'] = $filename_changed;
 
                 // upload file
                 $source      = $_FILES[ $field['id']]['tmp_name'];
-                $destination = self::$upload_subdir .$filename;
+                $destination = self::$upload_path .$filename_changed;
                 $upload      = move_uploaded_file( $source, $destination);
 
                 // insert file meta into database

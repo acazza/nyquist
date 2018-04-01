@@ -164,7 +164,7 @@ $volume->customfields()->add(array(
     array(
         'name'      => 'my example',
         'desc'      => 'Just an example.',
-        'id'        => '_custom_term_meta',
+        'id'        => 'custom_term_meta',
         'std'       => 'Default value here.',
         'type'      => 'text',
         'required'  =>  false
@@ -172,7 +172,7 @@ $volume->customfields()->add(array(
     array(
         'name'      => 'my course',
         'desc'      => 'Select the course this term is associated to.',
-        'id'        => '_meta_mycourse',
+        'id'        => 'meta_mycourse',
         'std'       => 'Default value here.',
         'type'      => 'relation',
         'posttype'  => 'anthology',
