@@ -363,7 +363,7 @@ class SoundlushPostMeta
               $prefix = '_repeater['.$c .'][';
               $suffix = ']';
               $pre_id = 'repeater_'.$c .'_';
-              $data   = $value[ $field['id'] ];
+              $data   = isset( $value[ $field['id'] ] ) ? $value[ $field['id'] ]  : '';
 
               echo $this->create_html_markup( $field, $data, $prefix, $suffix, $pre_id );
             }

@@ -11,8 +11,8 @@
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'soundlush-single-question' ); ?>>
 
   <?php
-  $question_ID = get_the_ID();
-  $content = get_the_content();
+  $question_id = get_the_ID();
+  $content     = get_the_content();
   ?>
 
   <header class="entry-header">
@@ -28,7 +28,7 @@
 
     <?php echo $content; ?>
 
-    <?php SoundlushCustomPostQuiz::setup_questions( $question_ID ); ?>
+    <?php SoundlushQuiz::setup_questions( $question_id ); ?>
 
   </div> <!-- .entry-content -->
 

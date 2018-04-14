@@ -1,6 +1,6 @@
 <?php
 
-function get_tree_structure()
+function soundlush_get_tree_structure()
 {
   //TODO get this dinamicaly
   $taxonomy     = 'volume';
@@ -138,28 +138,27 @@ if( ! class_exists('SoundlushTreeStructure') )
         {
           $user = get_current_user_id();
           $parent = '247'; //TODO get dinamicaly
+
           $completed = get_user_meta( $user, '_soundlush_usercomplete_'.$parent, false );
-          $search = $completed[0];
+          $search_completed = isset( $completed[0] ) ? $completed[0] : array();
+
+          $viewed = get_user_meta( $user, '_soundlush_userview_'.$parent, false );
+          $search_viewed = isset( $viewed[0] ) ? $viewed[0] : array();
 
           $postlink .= '<div class="accordion-body__contents">';
 
           foreach( $posts as $post )
           {
-            if( in_array( $post->ID, $search ) ){
-              $css_completed = 'marked-completed';
-            } else {
-              $css_completed = '';
-            }
 
-            $css_classes_post = '';
-            if( $_current_post == $post->ID ){
-              $css_classes_post = 'current-post';
-            }
+            $css_completed    = ( in_array( $post->ID, $search_completed ) )? ' marked-completed' : '';
+            $css_viewed       = ( in_array( $post->ID, $search_viewed ) )? ' marked-viewed' : '';
+            $css_classes_post = ( $_current_post == $post->ID )? 'current-post' : '';
+
             $postlink .= '<a class="tree-post-link" href="'. esc_url( get_the_permalink( $post->ID ) ) .'">';
             $postlink .= '<div class="tree-item tree-post-item tree-post-item-'.$post->ID.' depth-'. ($depth + 1).' '.$css_classes_post.'">';
             $postlink .= get_the_title($post->ID);
-            $postlink .= '<i class="fas fa-check tree-icon-item '.$css_completed.'"></i>';
-            $postlink .= '<i class="fas fa-eye tree-icon-item"></i>';
+            $postlink .= '<i class="fas fa-check tree-icon-item'.$css_completed.'"></i>';
+            $postlink .= '<i class="fas fa-eye tree-icon-item'.$css_viewed.'"></i>';
             $postlink .= '</div></a>';
           }
           $postlink .= '</div> <!--.accordion-body__contents-->';

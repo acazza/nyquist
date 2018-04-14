@@ -13,6 +13,7 @@ require get_template_directory() . '/inc/core/sidebar.php';
 require get_template_directory() . '/inc/api/customizer.php';
 require get_template_directory() . '/inc/api/widgets.php';
 require get_template_directory() . '/inc/api/shortcodes.php';
+require get_template_directory() . '/inc/api/rest-api.php';
 
 require get_template_directory() . '/inc/setup/theme-support.php';
 require get_template_directory() . '/inc/setup/enqueue.php';
@@ -33,9 +34,8 @@ require get_template_directory() . '/inc/custom/post-navigation.php';
 
 require get_template_directory() . '/inc/lms/comics.php';
 require get_template_directory() . '/inc/lms/courses.php';
-//require get_template_directory() . '/inc/lms/lessons.php';
-require get_template_directory() . '/inc/lms/exercise.php';
-//require get_template_directory() . '/inc/lms/quizzes.php';
+require get_template_directory() . '/inc/lms/exercises.php';
+require get_template_directory() . '/inc/lms/quizzes.php';
 
 
 

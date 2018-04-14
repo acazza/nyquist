@@ -14,28 +14,34 @@
   <main id-"main" class="site-main" role="main">
     <div class="container">
       <?php
-      if( have_posts() ):
-        while( have_posts() ): the_post();
+      if( is_user_logged_in()):
+        if( have_posts() ):
+          while( have_posts() ): the_post();
 
-          soundlush_save_post_views( get_the_ID() );
-          get_template_part( 'template-parts/single', get_post_format() ); ?>
+            soundlush_save_post_views( get_the_ID() );
+            get_template_part( 'template-parts/single', get_post_format() ); ?>
 
-          <aside class="tree-structure">
-            <?php get_tree_structure()?>
-          </aside>
+            <?php soundlush_mark_as_viewed(); ?>
 
-          <section class="article-navigation">
-            <?php
-            $post_type = get_post_type();
-            $nav = new SoundlushCustomPostNav();
-            $nav->get_custom_post_nav( $post_type );
-            ?>
+            <aside class="tree-structure">
+              <?php soundlush_get_tree_structure()?>
+            </aside>
 
-          </section>
-          <?php if( comments_open() ): ?>
-            <?php comments_template();?>
-          <?php endif;
-        endwhile;
+            <section class="article-navigation">
+              <?php
+              $post_type = get_post_type();
+              $nav = new SoundlushCustomPostNav();
+              $nav->get_custom_post_nav( $post_type );
+              ?>
+
+            </section>
+            <?php if( comments_open() ):
+                      comments_template();
+                  endif;
+          endwhile;
+        endif;
+      else:
+        echo 'You have to be logged in to access this content';
       endif;
       ?>
     </div> <!-- .container -->

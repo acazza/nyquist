@@ -13,8 +13,9 @@ function create_exercise_submission_form( $atts, $content = null ){
   // Get the attributes
   $atts = shortcode_atts(
     array(
-      'type'  => array('zip','rar'),
-      'size'  => '2',
+      'type'    => array('zip','rar'), // allowed file types // TODO
+      'size'    => '2',                // max file size      // TODO
+      'uploads' => '1'                 // number of files    // TODO
     ),
     $atts,
     'exercise'

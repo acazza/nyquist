@@ -98,82 +98,188 @@ jQuery( document ).ready( function($){
     }
   }
 
+
+
+
+  // $( '#save_quiz' ).on( 'click', function( e ){
+  //
+  //   // get all checked radio buttons dynamically
+  //   var data = "action=save_user_quiz&"+$.map($("input:radio:checked"), function(elem, idx) {
+  //      return "&"+$(elem).attr("name") + "="+ $(elem).val();
+  //   }).join('');
+  //
+  //   $.ajax({
+  //   //url: ajax_soundlush.ajax_url, //tells the Ajax call where to send the request
+  //     type : 'post',
+  //     data : data,
+	// 	  success : function( response ) {
+  //         if( response.success = 1 ){
+  //           alert( 'Your quiz was submitted successfully' );
+  //         } else {
+  //           alert( 'Oops... something went wrong' );
+  //         }
+	// 	  }
+  //
+  //   })
+  // });
+
+
   /*
    * === === === === ===
-   * Quiz
+   * GENERATE QUIZ MARKUP (REST API)
    * === === === === ===
    */
 
-
-   $( '#retake_quiz' ).on( 'click', function( e ){
-
-     console.log('retake');
-     var data = "action=retake_user_quiz";
-
-     $.ajax({
-       //url: ajax_soundlush.ajax_url, //tells the Ajax call where to send the request
-       type : 'post',
-       data : data,
-       success : function( response ) {
-           if( response.success = 1 ){
-             alert( 'Your quiz will start now' );
-           } else {
-             alert( 'Oops... something went wrong' );
-           }
-       }
-     })
+   $( '#soundlush_submit_quiz').click( function() {
+     console.log( "Handler for .click() called." );
    });
 
+  $( '#soundlush_generate_quiz' ).on( 'click', function( e ){
 
-   $( '#start_quiz' ).on( 'click', function( e ){
+    var pool = $(this).data('pool'),
+        qty  = '10';
+
+    $.get("http://localhost:8888/nysquist-dev/engine/wp-json/soundlush/v2/question/"+ parseInt( pool ) +'/'+ parseInt( qty ), function( posts ){
+
+        html = "<form id='quiz_questions' method='post' data-id='"+ pool +"'>";
+
+        $.each( posts, function( index, post ){
+
+            switch (post.level) {
+              case "1":
+                level = "Easy"
+                break;
+              case "2":
+                level = "Normal"
+                break;
+              case "3":
+                level = "Hard"
+                break;
+              default:
+                break;
+            }
 
 
-     var data = "action=start_user_quiz";
-
-     $.ajax({
-       //url: ajax_soundlush.ajax_url, //tells the Ajax call where to send the request
-       type : 'post',
-       data : data,
-       success : function( response ) {
-           if( response.success = 1 ){
-             alert( 'Your quiz will start now' );
-           } else {
-             alert( 'Oops... something went wrong' );
-           }
-       }
-     })
-   });
+            html += "<span>" + ( index + 1 ) + ". " + post.post_content + "</span>" +   "<p>Level: " + level + "</p>"+ "<ul>";
 
 
+            for(var i = 0; i < post.options.length; i++) {
+
+                var field = post.options[i];
+                var value = field.soundlush_answer_option;
+                var chr='abcdefghijklmnopqrstuvwxyz'.charAt( value - 1 );
+
+                html += "<li><label><input type='radio' name='" + post.ID + "' value='"+value+"'/>"+ chr +") "+ field.soundlush_answer_statement +"</label></li>";
+
+            }
+
+            html += "</ul>";
+        });
+
+        //html += "<input type='button' id='soundlush_submit_quiz' class='btn btn-primary'>Submit Quiz</button></form>";
+        html += "<input type='button' id='soundlush_submit_quiz' class='btn btn-primary' value='Motherfucker Quiz'></form>";
+
+        $( "#the-quiz" ).append( html );
 
 
-  $( '#save_quiz' ).on( 'click', function( e ){
+        //TODO set timeout and call save method
 
-    // get all checked radio buttons dynamically
-    var data = "action=save_user_quiz&"+$.map($("input:radio:checked"), function(elem, idx) {
-       return "&"+$(elem).attr("name") + "="+ $(elem).val();
-    }).join('');
+    });
 
-    $.ajax({
-    //url: ajax_soundlush.ajax_url, //tells the Ajax call where to send the request
-      type : 'post',
-      data : data,
-		  success : function( response ) {
-          if( response.success = 1 ){
-            alert( 'Your quiz was submitted successfully' );
-          } else {
-            alert( 'Oops... something went wrong' );
-          }
-		  }
-
-    })
   });
 
 
-  $('#soundlush_markcomplete_btn').on('click', function(e){
 
-      var user = $(this).data('user'),
-          post = $(this).data('id');
+  /*
+   * === === === === ===
+   * SUBMIT QUIZ ANSWER (AJAX)
+   * === === === === ===
+   */
+
+    // add checked attribute to html markup
+    // $( '#the-quiz' ).on( 'change','input[type=radio]', function(){
+    //     var name = $( this ).attr( 'name' );
+    //     $( 'input[name =' + name + ']' ).removeAttr("checked");
+    //     $( this ).attr('checked', true );
+    // });
+
+    // get all checked radio inputs dynamically into SERIALIZED OBJECT
+    // var answers1 = $.map($("input:radio:checked"), function(elem, idx) {
+    //    return $(elem).attr("name") + "=" + $(elem).val();
+    // }).join('&');
+
+
+   //TODO change trigger event for form submission
+    $( '#the-quiz' ).on( 'click', '#soundlush_submit_quiz', function( e )
+    {
+
+
+      // stop default submit behavior
+      e.preventDefault();
+
+
+      // get all radio groups name attributes dynamically into js OBJECT
+      var questions = [];
+      $( 'input:radio' ).each ( function(){
+          var question_id = $( this ).attr("name");
+          if( $.inArray( question_id, questions ) < 0 ){
+             questions.push(question_id);
+          }
+      });
+
+      // get all checked radio inputs name attributes dynamically into js OBJECT
+      var answers = {};
+      $( "input:radio:checked" ).each( function(){
+          var key = $( this ).attr("name");
+          var value = $( this ).val();
+          answers[key] = value;
+      });
+
+
+
+      $.ajax({
+		      url: ajax_soundlush.ajax_url,
+          type: 'POST',
+          data: {
+               user_id : '1',
+               post_id : '237',
+               questions: JSON.stringify( questions ),
+               answers: JSON.stringify( answers ),
+               nonce: ajax_soundlush.ajax_nonce,
+               action: 'save_user_quiz',
+          },
+          error : function( jqXHR, textStatus, errorThrown ){
+              console.log(textStatus);
+              console.log(errorThrown);
+          },
+          success : function( data, textStatus, jqXHR ){
+              if( data.success = 1 ){
+                console.log( textStatus );
+                setTimeout( function(){
+                    // reload page and scroll to top
+                    location.reload();
+                    $(document).scrollTop(0)
+                }, 1000 );
+              } else {
+                console.log( 'Oops... something went wrong' );
+              }
+          }
+      });
+
+    });
+
+
+
+  /*
+   * === === === === ===
+   * USER MARK POST AS COMPLETE (AJAX)
+   * === === === === ===
+   */
+
+  $( '#soundlush_markcomplete_btn' ).on( 'click', function( e ){
+
+      var user = $( this ).data( 'user' ),
+          post = $( this ).data( 'id' );
 
       $.ajax({
         url: ajax_soundlush.ajax_url,
@@ -199,7 +305,7 @@ jQuery( document ).ready( function($){
 
   /*
    * === === === === ===
-   * FRONTEND USER SUBMISSION FORM
+   * FRONTEND USER SUBMISSION FORM (AJAX)
    * === === === === ===
    */
 

@@ -22,7 +22,7 @@
           echo the_title();
           $post_id = get_the_id();
 
-          if( SoundlushCustomPostQuiz::has_taken_quiz($post_id) ) {
+          //if( SoundlushCustomPostQuiz::has_taken_quiz($post_id) ) {
           ?>
             <div id="quiz-result">
               <div id="quiz-percent">
@@ -39,14 +39,14 @@
 
             </div>
           <?php
-          } else {
+          //} else {
           ?>
             <div class="quiz-start">
               <?php echo the_content(); ?>
               <input type="submit" name="start_quiz" id="start_quiz" class="btn btn-accent" value="Start Quiz" />
             </div>
           <?php
-          }
+          //}
         endwhile;
       }
       ?>
